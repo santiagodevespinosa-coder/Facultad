@@ -1,0 +1,11 @@
+# Ignorar apuntes de clase que no sean código o diagramas
+*.docx
+*.pdf
+*.pptx
+*.zip
+*.rar
+
+# Ignorar archivos temporales o de configuración local de Windows/Office
+~*
+Thumbs.db
+.DS_Store
