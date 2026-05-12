@@ -193,8 +193,8 @@ SELECT
     p.nombre,
     p.apellido
 FROM
-	materia as m,
-    profesores as p
+	materia as m INNER JOIN profesores as p ON
+    m.idprof = p.idprof
 WHERE
 	m.creditos > 3
 ORDER BY
@@ -219,3 +219,121 @@ FROM
     ON m.idmat = i.idmat
 WHERE
 	e.nombre LIKE '%a%' AND insc.fecha_inscripcion < '2025-02-14';
+    
+/*Ejercicio 12
+Mostrar los apellidos distintos (sin repetir) de los estudiantes que tengan al menos una inscripción registrada. 
+Adicionalmente, ordenar los resultados alfabéticamente por apellido. (Combinar DISTINCT, JOIN y ORDER BY). */
+
+SELECT DISTINCT
+	e.apellido
+FROM
+	estudiantes as e INNER JOIN inscripciones as insc ON
+    e.idest = insc.idest
+ORDER BY
+	e.apellido;
+    
+/*Ejercicio 13
+Generar dos columnas:
+
+    nombre_completo: concatenar el nombre y apellido de los profesores que dictan materias con más de 3 créditos.
+    info_contacto: usar CONCAT_WS con el separador ' | ' para mostrar apellido, nombre y email del profesor.
+
+Ordenar el resultado por apellido. 
+(Combinar CONCAT/CONCAT_WS, JOIN, WHERE, ORDER BY). */
+
+SELECT
+	CONCAT(p.nombre, ' ', p.apellido) AS nombre_completo,
+    CONCAT_WS('|', p.nombre, p.apellido, p.email) AS info_contacto
+FROM
+	profesores AS p INNER JOIN materia as m ON
+    p.idprof = m.idprof
+WHERE
+	m.creditos > 3
+ORDER BY
+	p.apellido DESC;
+
+/*Ejercicio 14
+Calcular la edad actual de cada estudiante en días (usar DATEDIFF con CURDATE()).
+ Mostrar nombre, apellido y una columna llamada dias_vividos. */
+ 
+ SELECT
+	e.nombre,
+    e.apellido,
+    DATEDIFF(CURDATE(), e.fecha_nacimiento) AS dias_vividos
+FROM
+	estudiantes AS e;
+    
+/*Ejercicio 15
+Obtener las 3 materias con mayor cantidad de créditos. En caso de empate, mostrar la de menor nombre_materia alfabéticamente. 
+Usar ORDER BY y FETCH FIRST 3 ROWS ONLY (o LIMIT si tu motor lo prefiere). */
+
+SELECT
+	m.nombre_materia,
+    m.creditos
+FROM
+	materia AS m
+ORDER BY
+	m.creditos DESC,
+	m.nombre_materia
+LIMIT 3;
+
+/*Ejercicio 16
+Contar cuántas materias dicta cada profesor. Mostrar nombre y apellido del profesor y la cantidad de materias (COUNT). 
+Incluir también a los profesores que no dictan ninguna materia (usar LEFT JOIN). Agrupar por profesor. */
+
+SELECT
+	p.nombre,
+    p.apellido,
+    COUNT(m.idmat) AS cantidad_materias
+FROM
+	profesores AS p LEFT JOIN materia as m ON
+    p.idprof = m.idprof
+GROUP BY
+	p.idprof,
+    p.nombre,
+    p.apellido;
+
+/*Ejercicio 17
+Calcular el promedio de calificaciones por cada estudiante. Mostrar nombre, apellido y promedio (AVG). 
+Luego filtrar con HAVING para mostrar solo aquellos cuyo promedio sea mayor a 7.0. */
+
+SELECT
+    e.nombre,
+    e.apellido,
+    AVG(insc.calificacion) AS promedio_calificacion
+FROM
+    estudiantes AS e
+INNER JOIN 
+    inscripciones AS insc ON e.idest = insc.idest
+GROUP BY
+    e.idest,
+    e.nombre,
+    e.apellido
+HAVING
+    promedio_calificacion > 7.0;
+
+/*Ejercicio 18
+Por cada materia, mostrar:
+
+    nombre_materia
+    cantidad de estudiantes inscriptos (COUNT)
+    calificación promedio (AVG)
+    calificación máxima (MAX)
+    calificación mínima (MIN)
+
+Incluir solo las materias que tengan al menos 2 inscripciones (usar HAVING COUNT >= 2). */
+
+SELECT
+    m.nombre_materia,
+    COUNT(insc.idinsc) AS cantidad_inscriptos,
+    AVG(insc.calificacion) AS promedio_calificacion,
+    MAX(insc.calificacion) AS calificacion_maxima,
+    MIN(insc.calificacion) AS calificacion_minima
+FROM
+    materia AS m INNER JOIN inscripciones AS insc ON 
+    m.idmat = insc.idmat
+GROUP BY
+    m.idmat,
+    m.nombre_materia
+HAVING
+    cantidad_inscriptos >= 2;
