@@ -230,7 +230,7 @@ FROM
 	estudiantes as e INNER JOIN inscripciones as insc ON
     e.idest = insc.idest
 ORDER BY
-	e.apellido;
+	e.apellido ASC;
     
 /*Ejercicio 13
 Generar dos columnas:
@@ -241,6 +241,7 @@ Generar dos columnas:
 Ordenar el resultado por apellido. 
 (Combinar CONCAT/CONCAT_WS, JOIN, WHERE, ORDER BY). */
 
+/*El WS le pones el separador como primer campo y te separa entre campo y campo*/
 SELECT
 	CONCAT(p.nombre, ' ', p.apellido) AS nombre_completo,
     CONCAT_WS('|', p.nombre, p.apellido, p.email) AS info_contacto
@@ -302,9 +303,8 @@ SELECT
     e.apellido,
     AVG(insc.calificacion) AS promedio_calificacion
 FROM
-    estudiantes AS e
-INNER JOIN 
-    inscripciones AS insc ON e.idest = insc.idest
+    estudiantes AS e INNER JOIN inscripciones AS insc ON 
+    e.idest = insc.idest
 GROUP BY
     e.idest,
     e.nombre,
@@ -337,3 +337,8 @@ GROUP BY
     m.nombre_materia
 HAVING
     cantidad_inscriptos >= 2;
+
+/*Regla de oro: cuando vos en un select usas alguna funcion de agregado
+si a parte tenes otros campos que no estan siendo usados, entonces
+todo campo que no sea usado en una funcion de agregado lo tenes que 
+mandar al group by*/
