@@ -1,0 +1,31 @@
+CREATE TABLE Alumnos (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    Nombre VARCHAR(50),
+    Apellido VARCHAR(50),
+    Edad INT,
+    CorreoElectronico VARCHAR(100)
+);
+
+CREATE TABLE Materias (
+    MateriaID INT PRIMARY KEY AUTO_INCREMENT,
+    NombreMateria VARCHAR(50)
+);
+
+CREATE TABLE AlumnosXMateria (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    AlumnoID INT,
+    MateriaID INT,
+    FOREIGN KEY (AlumnoID) REFERENCES Alumnos(ID),
+    FOREIGN KEY (MateriaID) REFERENCES Materias(MateriaID)
+);
+
+CREATE TABLE CalificacionesXAlumno (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    AlumnoID INT,
+    MateriaID INT,
+    FechaExamen DATE,
+    Calificacion INT,
+    FOREIGN KEY (AlumnoID) REFERENCES Alumnos(ID),
+    FOREIGN KEY (MateriaID) REFERENCES Materias(MateriaID)
+);
+
