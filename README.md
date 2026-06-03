@@ -60,7 +60,7 @@ Para que la navegación sea sencilla, el proyecto está estructurado de la sigui
 
 \## 📬 Contacto
 
-\* \*\*LinkedIn:\*\* \[Santiago Fernández Espinosa](www.linkedin.com/in/santiago-fernández-espinosa-252ab6324)
+\* \*\*LinkedIn:\*\* \[Santiago Fernández Espinosa](www.linkedin.com/in/santiagoespinosa04)
 
 \* \*\*GitHub:\*\* \[@santiagodevespinosa-coder](https://github.com/santiagodevespinosa-coder)
 
