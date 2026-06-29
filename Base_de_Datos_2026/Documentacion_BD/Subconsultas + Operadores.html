@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subconsultas SQL - Guía autodidacta</title>
+<style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        margin: 0;
+        background: #f4f7fc;
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.58;
+        color: #1e2a3e;
+        padding: 2rem 1rem;
+    }
+    .container {
+        max-width: 1180px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 1.35rem;
+        box-shadow: 0 20px 35px -10px rgba(0,0,0,0.12);
+        padding: 2.4rem;
+    }
+    h1 {
+        font-size: 2.25rem;
+        line-height: 1.15;
+        border-left: 7px solid #2c6e9e;
+        padding-left: 1rem;
+        margin: 0 0 1.2rem;
+        color: #0a2f44;
+    }
+    .subtitle {
+        font-size: 1.08rem;
+        color: #475569;
+        margin-bottom: 1.6rem;
+    }
+    h2 {
+        font-size: 1.65rem;
+        margin-top: 2.4rem;
+        margin-bottom: 0.9rem;
+        color: #1e4a76;
+        border-bottom: 2px solid #cbd5e1;
+        padding-bottom: 0.35rem;
+        break-after: avoid;
+    }
+    h3 {
+        font-size: 1.25rem;
+        margin: 1.5rem 0 0.55rem;
+        color: #2c5282;
+        break-after: avoid;
+    }
+    h4 {
+        font-size: 1.08rem;
+        margin: 1.1rem 0 0.4rem;
+        color: #334155;
+        break-after: avoid;
+    }
+    p { margin: 0 0 1rem; color: #2d3e50; }
+    ul, ol { margin: 0 0 1rem 1.6rem; padding: 0; }
+    li { margin-bottom: 0.4rem; }
+    code {
+        background: #eef2f5;
+        padding: 0.14rem 0.35rem;
+        border-radius: 6px;
+        font-family: Consolas, 'Fira Code', 'Courier New', monospace;
+        font-size: 0.92em;
+        color: #b22234;
+    }
+    pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.05rem 1.15rem;
+        border-radius: 0.95rem;
+        overflow-x: auto;
+        font-family: Consolas, 'Fira Code', 'Courier New', monospace;
+        font-size: 0.88rem;
+        margin: 1rem 0 1.2rem;
+        border: 1px solid #334155;
+        line-height: 1.45;
+        white-space: pre;
+        break-inside: avoid;
+    }
+    pre code { background: transparent; color: inherit; padding: 0; border-radius: 0; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #f8fafc;
+        margin: 1rem 0 1.3rem;
+        font-size: 0.94rem;
+        break-inside: avoid;
+    }
+    th, td { border: 1px solid #cbd5e1; padding: 0.62rem; vertical-align: top; }
+    th { background: #e2e8f0; color: #1e293b; }
+    .note, .warning, .example, .tip, .question {
+        padding: 1rem 1.05rem;
+        border-radius: 0.8rem;
+        margin: 1rem 0;
+        break-inside: avoid;
+    }
+    .note { background: #e6f7ff; border-left: 5px solid #0077b6; }
+    .warning { background: #fff3e0; border-left: 5px solid #e67e22; }
+    .example { background: #edfdf5; border-left: 5px solid #10b981; }
+    .tip { background: #f0f5ff; border-left: 5px solid #6366f1; }
+    .question { background: #fef2f2; border-left: 5px solid #ef4444; }
+    .toc {
+        background: #f8fafc;
+        border: 1px solid #dbe3ef;
+        border-radius: 0.9rem;
+        padding: 1rem 1.2rem;
+        margin: 1.2rem 0 1.8rem;
+    }
+    .toc ul { columns: 2; margin-bottom: 0; }
+    .toc a { color: #1e4a76; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .mini-title { font-weight: 700; color: #0f172a; margin-bottom: 0.35rem; }
+    .step {
+        border: 1px solid #dbe3ef;
+        border-radius: 0.8rem;
+        padding: 0.9rem 1rem;
+        margin: 0.8rem 0;
+        background: #ffffff;
+        break-inside: avoid;
+    }
+    .step strong { color: #1e4a76; }
+    .kbd {
+        display: inline-block;
+        padding: 0.1rem 0.4rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.35rem;
+        background: #f8fafc;
+        font-family: Consolas, monospace;
+        font-size: 0.9em;
+    }
+    .small { font-size: 0.92rem; color: #475569; }
+    .page-break { break-before: page; }
+    @media print {
+        body { background: white; padding: 0; }
+        .container { max-width: none; box-shadow: none; border-radius: 0; padding: 1.2cm; }
+        .toc ul { columns: 1; }
+        a { color: inherit; text-decoration: none; }
+        h2 { break-before: auto; }
+        pre, table, .note, .warning, .example, .tip, .question, .step { break-inside: avoid; }
+        @page { size: A4; margin: 1.4cm; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Subconsultas SQL: guía autodidacta paso a paso</h1>
+<p class="subtitle">Material teórico para aprender subconsultas de manera progresiva. La idea es partir de consultas conocidas, como <code>SELECT</code>, <code>WHERE</code>, <code>JOIN</code>, <code>GROUP BY</code> y <code>HAVING</code>, y avanzar hacia consultas que dependen del resultado de otras consultas.</p>
+
+<div class="note">
+    <div class="mini-title">Objetivo del apunte</div>
+    <p>Al finalizar este material deberías poder leer, interpretar y escribir subconsultas sencillas y medianamente complejas, entendiendo cuándo una subconsulta devuelve un valor, una lista o una tabla, y qué operador conviene usar en cada caso.</p>
+</div>
+
+<div class="toc">
+    <div class="mini-title">Índice</div>
+    <ul>
+        <li><a href="#punto-partida">1. Punto de partida</a></li>
+        <li><a href="#base-ejemplo">2. Base de datos ejemplo</a></li>
+        <li><a href="#que-es">3. Qué es una subconsulta</a></li>
+        <li><a href="#por-que">4. Por qué usar subconsultas</a></li>
+        <li><a href="#tipos-resultado">5. Tipos según resultado</a></li>
+        <li><a href="#escalares">6. Subconsultas escalares</a></li>
+        <li><a href="#listas">7. Subconsultas que devuelven listas</a></li>
+        <li><a href="#in-notin">8. IN y NOT IN</a></li>
+        <li><a href="#any-all">9. ANY, SOME y ALL</a></li>
+        <li><a href="#exists">10. EXISTS y NOT EXISTS</a></li>
+        <li><a href="#correlacionadas">11. Subconsultas correlacionadas</a></li>
+        <li><a href="#select-from-having">12. Subconsultas en SELECT, FROM y HAVING</a></li>
+        <li><a href="#joins">13. Subconsultas, JOIN y HAVING</a></li>
+        <li><a href="#errores">14. Errores comunes</a></li>
+        <li><a href="#guia-rapida">15. Guía rápida de decisión</a></li>
+    </ul>
+</div>
+
+<h2 id="punto-partida">1. Punto de partida: qué ya deberíamos saber</h2>
+<p>Antes de estudiar subconsultas, conviene tener claros estos temas:</p>
+<ul>
+    <li><code>SELECT</code>: permite seleccionar columnas.</li>
+    <li><code>FROM</code>: indica de qué tabla se obtienen los datos.</li>
+    <li><code>WHERE</code>: filtra filas antes de agrupar.</li>
+    <li><code>JOIN</code>: permite combinar datos de varias tablas relacionadas.</li>
+    <li><code>GROUP BY</code>: agrupa filas para aplicar funciones como <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code> y <code>MAX</code>.</li>
+    <li><code>HAVING</code>: filtra grupos luego de aplicar <code>GROUP BY</code>.</li>
+</ul>
+
+<div class="example">
+    <div class="mini-title">Idea central</div>
+    <p>Una subconsulta aparece cuando para resolver una pregunta necesito responder primero otra pregunta más pequeña.</p>
+</div>
+
+<h2 id="base-ejemplo">2. Base de datos ejemplo para todo el apunte</h2>
+<p>Para que el tema no quede suelto, usaremos siempre el mismo contexto: una tienda que tiene clientes, productos, ventas y detalle de ventas.</p>
+
+<h3>2.1 Tablas usadas</h3>
+<table>
+    <thead>
+        <tr><th>Tabla</th><th>Qué representa</th><th>Columnas principales</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>clientes</code></td><td>Personas que compran en la tienda.</td><td><code>id_cliente</code>, <code>nombre</code>, <code>ciudad</code>, <code>edad</code></td></tr>
+        <tr><td><code>productos</code></td><td>Productos disponibles.</td><td><code>id_producto</code>, <code>nombre</code>, <code>categoria</code>, <code>precio</code></td></tr>
+        <tr><td><code>ventas</code></td><td>Cabecera de cada venta.</td><td><code>id_venta</code>, <code>id_cliente</code>, <code>fecha</code></td></tr>
+        <tr><td><code>detalle_ventas</code></td><td>Productos vendidos en cada venta.</td><td><code>id_detalle</code>, <code>id_venta</code>, <code>id_producto</code>, <code>cantidad</code>, <code>precio_unitario</code></td></tr>
+    </tbody>
+</table>
+
+<h3>2.2 Script opcional para probar los ejemplos</h3>
+<p>Este script no es obligatorio para comprender la teoría, pero permite copiar y probar las consultas en un motor SQL compatible con MySQL/MariaDB.</p>
+<pre><code>CREATE TABLE clientes (
+    id_cliente INT PRIMARY KEY,
+    nombre VARCHAR(80),
+    ciudad VARCHAR(80),
+    edad INT
+);
+
+CREATE TABLE productos (
+    id_producto INT PRIMARY KEY,
+    nombre VARCHAR(80),
+    categoria VARCHAR(80),
+    precio DECIMAL(10,2)
+);
+
+CREATE TABLE ventas (
+    id_venta INT PRIMARY KEY,
+    id_cliente INT,
+    fecha DATE,
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+
+CREATE TABLE detalle_ventas (
+    id_detalle INT PRIMARY KEY,
+    id_venta INT,
+    id_producto INT,
+    cantidad INT,
+    precio_unitario DECIMAL(10,2),
+    FOREIGN KEY (id_venta) REFERENCES ventas(id_venta),
+    FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
+INSERT INTO clientes VALUES
+(1, 'Ana', 'Mar del Plata', 25),
+(2, 'Bruno', 'Balcarce', 31),
+(3, 'Carla', 'Mar del Plata', 22),
+(4, 'Diego', 'Tandil', 40),
+(5, 'Elena', 'Balcarce', 29),
+(6, 'Federico', 'Mar del Plata', 35);
+
+INSERT INTO productos VALUES
+(1, 'Teclado', 'Tecnologia', 18000),
+(2, 'Mouse', 'Tecnologia', 9500),
+(3, 'Monitor', 'Tecnologia', 120000),
+(4, 'Silla', 'Muebles', 85000),
+(5, 'Escritorio', 'Muebles', 160000),
+(6, 'Cuaderno', 'Libreria', 3500);
+
+INSERT INTO ventas VALUES
+(1, 1, '2025-05-01'),
+(2, 2, '2025-05-03'),
+(3, 1, '2025-05-07'),
+(4, 4, '2025-05-10'),
+(5, 6, '2025-05-12');
+
+INSERT INTO detalle_ventas VALUES
+(1, 1, 1, 1, 18000),
+(2, 1, 2, 2, 9500),
+(3, 2, 4, 1, 85000),
+(4, 3, 3, 1, 120000),
+(5, 4, 5, 1, 160000),
+(6, 5, 2, 1, 9500),
+(7, 5, 6, 4, 3500);</code></pre>
+
+<h2 id="que-es">3. Qué es una subconsulta</h2>
+<p>Una <strong>subconsulta</strong> es una consulta <code>SELECT</code> escrita dentro de otra consulta. También puede llamarse <em>consulta anidada</em> o <em>subquery</em>.</p>
+
+<pre><code>SELECT columnas
+FROM tabla
+WHERE columna operador (
+    SELECT columna_o_calculo
+    FROM otra_tabla
+    WHERE condicion
+);</code></pre>
+
+<p>En esa estructura hay dos partes:</p>
+<ul>
+    <li><strong>Consulta externa:</strong> es la consulta principal, la que finalmente devuelve el resultado.</li>
+    <li><strong>Consulta interna:</strong> es la subconsulta, ubicada entre paréntesis.</li>
+</ul>
+
+<div class="warning">
+    <div class="mini-title">Regla básica</div>
+    <p>Las subconsultas se escriben entre paréntesis. Esto ayuda a que SQL sepa qué parte debe resolver primero y cómo usar ese resultado dentro de la consulta principal.</p>
+</div>
+
+<h2 id="por-que">4. Por qué usar subconsultas</h2>
+<p>Las subconsultas son útiles cuando una consulta depende del resultado de otra. En lugar de resolver un problema en varios pasos separados, podemos escribir una sola instrucción SQL.</p>
+
+<h3>4.1 Ejemplo sencillo: productos más caros que el promedio</h3>
+<p>Supongamos que queremos listar los productos cuyo precio sea mayor al precio promedio general.</p>
+
+<div class="step">
+    <strong>Paso 1:</strong> primero necesito saber cuál es el precio promedio.
+</div>
+<pre><code>SELECT AVG(precio)
+FROM productos;</code></pre>
+
+<div class="step">
+    <strong>Paso 2:</strong> después necesito buscar productos cuyo precio sea mayor que ese promedio.
+</div>
+<pre><code>SELECT nombre, precio
+FROM productos
+WHERE precio > 66000;</code></pre>
+
+<p>El problema es que escribir <code>66000</code> manualmente no es conveniente. Si cambian los precios o se agregan productos, el promedio cambia.</p>
+
+<div class="step">
+    <strong>Consulta final con subconsulta:</strong> dejamos que SQL calcule el promedio y lo use directamente.
+</div>
+<pre><code>SELECT nombre, precio
+FROM productos
+WHERE precio > (
+    SELECT AVG(precio)
+    FROM productos
+);</code></pre>
+
+<div class="example">
+    <div class="mini-title">Lectura en castellano</div>
+    <p>Mostrar los productos cuyo precio sea mayor que el promedio de precio de todos los productos.</p>
+</div>
+
+<h3>4.2 Algo que no se resuelve cómodamente con una consulta simple</h3>
+<p>Ahora pensemos esta pregunta:</p>
+
+<div class="question">
+    <p><strong>¿Qué clientes nunca realizaron una compra?</strong></p>
+</div>
+
+<p>Con una consulta simple sobre <code>clientes</code> no alcanza, porque la información de las compras está en otra tabla: <code>ventas</code>. Necesitamos comparar clientes contra ventas y detectar ausencia de registros.</p>
+
+<pre><code>SELECT c.nombre
+FROM clientes AS c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ventas AS v
+    WHERE v.id_cliente = c.id_cliente
+);</code></pre>
+
+<p>Esta consulta dice: mostrar cada cliente para el cual no exista ninguna venta asociada.</p>
+
+<div class="tip">
+    <div class="mini-title">Por qué este caso es importante</div>
+    <p>Las subconsultas no sirven solo para calcular números. También sirven para responder preguntas de existencia: quién tiene registros relacionados y quién no los tiene.</p>
+</div>
+
+<h2 id="tipos-resultado">5. Tipos de subconsultas según el resultado que devuelven</h2>
+<p>Para elegir correctamente el operador, primero hay que mirar qué devuelve la subconsulta.</p>
+
+<table>
+    <thead>
+        <tr><th>Tipo</th><th>Qué devuelve</th><th>Ejemplo de resultado</th><th>Operadores habituales</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Escalar</td><td>Una sola fila y una sola columna.</td><td><code>66000</code></td><td><code>=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>&lt;&gt;</code></td></tr>
+        <tr><td>Lista</td><td>Una columna y varias filas.</td><td><code>1, 2, 4</code></td><td><code>IN</code>, <code>NOT IN</code>, <code>ANY</code>, <code>SOME</code>, <code>ALL</code></td></tr>
+        <tr><td>Tabla derivada</td><td>Varias filas y varias columnas.</td><td>Una tabla temporal de resultados.</td><td>Se usa en <code>FROM</code> con alias.</td></tr>
+        <tr><td>Existencia</td><td>No importa qué valores devuelve, solo si devuelve filas.</td><td>Verdadero o falso.</td><td><code>EXISTS</code>, <code>NOT EXISTS</code></td></tr>
+    </tbody>
+</table>
+
+<div class="warning">
+    <div class="mini-title">Clave para evitar errores</div>
+    <p>Si la subconsulta devuelve varios valores, no puedo compararla con <code>=</code> como si fuera un solo valor. Para listas debo usar operadores pensados para listas, como <code>IN</code>, <code>ANY</code> o <code>ALL</code>.</p>
+</div>
+
+<h2 id="escalares">6. Subconsultas escalares</h2>
+<p>Una subconsulta escalar devuelve <strong>un único valor</strong>. Por eso puede usarse como si fuera un número, texto o fecha.</p>
+
+<h3>6.1 Productos con el precio máximo</h3>
+<p>Primero obtengo el precio máximo:</p>
+<pre><code>SELECT MAX(precio)
+FROM productos;</code></pre>
+
+<p>Luego uso ese valor para buscar el producto correspondiente:</p>
+<pre><code>SELECT nombre, precio
+FROM productos
+WHERE precio = (
+    SELECT MAX(precio)
+    FROM productos
+);</code></pre>
+
+<div class="note">
+    <p>Esta consulta puede devolver más de un producto si hay empate en el precio máximo. Eso no está mal: la subconsulta devuelve un solo valor, pero varias filas de la consulta externa pueden coincidir con ese valor.</p>
+</div>
+
+<h3>6.2 Clientes mayores que el promedio de edad</h3>
+<pre><code>SELECT nombre, edad
+FROM clientes
+WHERE edad > (
+    SELECT AVG(edad)
+    FROM clientes
+);</code></pre>
+
+<p>La subconsulta calcula un valor: el promedio de edad. La consulta externa compara la edad de cada cliente contra ese valor.</p>
+
+<h3>6.3 Subconsulta escalar en SELECT</h3>
+<p>También podemos mostrar un dato calculado por subconsulta como una columna más.</p>
+<pre><code>SELECT nombre,
+       precio,
+       (SELECT AVG(precio) FROM productos) AS promedio_general
+FROM productos;</code></pre>
+
+<p>En este caso, cada fila muestra el producto, su precio y el promedio general de todos los productos.</p>
+
+<div class="warning">
+    <div class="mini-title">Cuidado</div>
+    <p>Cuando una subconsulta está en el <code>SELECT</code> como columna, normalmente debe devolver un único valor. Si devuelve varias filas, SQL no sabrá qué valor mostrar en esa celda.</p>
+</div>
+
+<h2 id="listas">7. Subconsultas que devuelven listas</h2>
+<p>Una subconsulta de lista devuelve una sola columna, pero puede devolver varias filas. Es útil cuando quiero comparar un valor contra un conjunto de valores.</p>
+
+<h3>7.1 Clientes que realizaron compras</h3>
+<p>Primero puedo obtener los identificadores de clientes que aparecen en ventas:</p>
+<pre><code>SELECT id_cliente
+FROM ventas;</code></pre>
+
+<p>Luego uso esa lista para filtrar clientes:</p>
+<pre><code>SELECT nombre
+FROM clientes
+WHERE id_cliente IN (
+    SELECT id_cliente
+    FROM ventas
+);</code></pre>
+
+<p>Lectura: mostrar los clientes cuyo <code>id_cliente</code> esté dentro de la lista de clientes que realizaron ventas.</p>
+
+<h3>7.2 Productos vendidos al menos una vez</h3>
+<pre><code>SELECT nombre
+FROM productos
+WHERE id_producto IN (
+    SELECT id_producto
+    FROM detalle_ventas
+);</code></pre>
+
+<p>La subconsulta devuelve una lista de productos que aparecen en el detalle de ventas. La consulta externa muestra sus nombres desde la tabla <code>productos</code>.</p>
+
+<h2 id="in-notin">8. Operadores IN y NOT IN</h2>
+<p><code>IN</code> pregunta si un valor pertenece a una lista. <code>NOT IN</code> pregunta si un valor no pertenece a una lista.</p>
+
+<h3>8.1 IN con una lista escrita manualmente</h3>
+<pre><code>SELECT nombre, ciudad
+FROM clientes
+WHERE ciudad IN ('Mar del Plata', 'Balcarce');</code></pre>
+
+<p>Esto equivale a escribir:</p>
+<pre><code>SELECT nombre, ciudad
+FROM clientes
+WHERE ciudad = 'Mar del Plata'
+   OR ciudad = 'Balcarce';</code></pre>
+
+<h3>8.2 IN con subconsulta</h3>
+<pre><code>SELECT nombre
+FROM clientes
+WHERE id_cliente IN (
+    SELECT id_cliente
+    FROM ventas
+);</code></pre>
+
+<p>Acá la lista no la escribimos nosotros. La genera una subconsulta.</p>
+
+<h3>8.3 NOT IN</h3>
+<pre><code>SELECT nombre
+FROM productos
+WHERE id_producto NOT IN (
+    SELECT id_producto
+    FROM detalle_ventas
+);</code></pre>
+
+<p>Lectura: mostrar productos cuyo identificador no aparezca en el detalle de ventas.</p>
+
+<div class="warning">
+    <div class="mini-title">Advertencia importante sobre NOT IN y NULL</div>
+    <p>Si la subconsulta usada con <code>NOT IN</code> devuelve algún valor <code>NULL</code>, el resultado puede ser inesperado o incluso no devolver filas. Por eso, cuando se busca ausencia de registros relacionados, muchas veces es más seguro usar <code>NOT EXISTS</code>.</p>
+</div>
+
+<h2 id="any-all">9. Operadores ANY, SOME y ALL</h2>
+<p>Estos operadores permiten comparar un valor contra una lista usando operadores como <code>&gt;</code>, <code>&lt;</code>, <code>=</code>, <code>&lt;&gt;</code>, etc.</p>
+
+<h3>9.1 ANY y SOME</h3>
+<p><code>ANY</code> significa “alguno”. <code>SOME</code> es sinónimo de <code>ANY</code> en SQL.</p>
+
+<pre><code>SELECT nombre, precio
+FROM productos
+WHERE precio &gt; ANY (
+    SELECT precio
+    FROM productos
+    WHERE categoria = 'Libreria'
+);</code></pre>
+
+<p>Lectura: mostrar productos cuyo precio sea mayor que al menos uno de los precios de la categoría Libreria.</p>
+
+<div class="tip">
+    <p>Si uso <code>&gt; ANY</code>, alcanza con superar al menor valor de la lista. Si un producto es mayor que alguno, ya cumple.</p>
+</div>
+
+<h3>9.2 ALL</h3>
+<p><code>ALL</code> significa “todos”. La condición debe cumplirse contra todos los valores devueltos por la subconsulta.</p>
+
+<pre><code>SELECT nombre, precio
+FROM productos
+WHERE precio &gt; ALL (
+    SELECT precio
+    FROM productos
+    WHERE categoria = 'Libreria'
+);</code></pre>
+
+<p>Lectura: mostrar productos cuyo precio sea mayor que todos los precios de la categoría Libreria.</p>
+
+<div class="tip">
+    <p>Si uso <code>&gt; ALL</code>, debo superar al mayor valor de la lista. Es una condición más exigente que <code>&gt; ANY</code>.</p>
+</div>
+
+<h3>9.3 Comparación mental rápida</h3>
+<table>
+    <thead>
+        <tr><th>Condición</th><th>Se cumple si...</th><th>Equivalencia aproximada</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>&gt; ANY (lista)</code></td><td>Es mayor que algún valor de la lista.</td><td>Mayor que el mínimo.</td></tr>
+        <tr><td><code>&gt; ALL (lista)</code></td><td>Es mayor que todos los valores de la lista.</td><td>Mayor que el máximo.</td></tr>
+        <tr><td><code>&lt; ANY (lista)</code></td><td>Es menor que algún valor de la lista.</td><td>Menor que el máximo.</td></tr>
+        <tr><td><code>&lt; ALL (lista)</code></td><td>Es menor que todos los valores de la lista.</td><td>Menor que el mínimo.</td></tr>
+    </tbody>
+</table>
+
+<h2 id="exists">10. EXISTS y NOT EXISTS</h2>
+<p><code>EXISTS</code> no compara un valor contra una lista. Lo que hace es preguntar si la subconsulta devuelve al menos una fila.</p>
+
+<h3>10.1 Clientes que realizaron alguna compra</h3>
+<pre><code>SELECT c.nombre
+FROM clientes AS c
+WHERE EXISTS (
+    SELECT 1
+    FROM ventas AS v
+    WHERE v.id_cliente = c.id_cliente
+);</code></pre>
+
+<p>Lectura: mostrar clientes para los cuales exista al menos una venta asociada.</p>
+
+<div class="note">
+    <div class="mini-title">¿Por qué SELECT 1?</div>
+    <p>Con <code>EXISTS</code> no importa qué columnas devuelve la subconsulta. Solo importa si devuelve filas. Por eso se suele escribir <code>SELECT 1</code>, aunque también podría verse <code>SELECT *</code>.</p>
+</div>
+
+<h3>10.2 Clientes que nunca compraron</h3>
+<pre><code>SELECT c.nombre
+FROM clientes AS c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM ventas AS v
+    WHERE v.id_cliente = c.id_cliente
+);</code></pre>
+
+<p>Lectura: mostrar clientes para los cuales no exista ninguna venta asociada.</p>
+
+<h3>10.3 Productos nunca vendidos</h3>
+<pre><code>SELECT p.nombre
+FROM productos AS p
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM detalle_ventas AS dv
+    WHERE dv.id_producto = p.id_producto
+);</code></pre>
+
+<div class="tip">
+    <div class="mini-title">Cuándo preferir EXISTS</div>
+    <p><code>EXISTS</code> suele ser muy claro cuando la pregunta es “existe o no existe un registro relacionado”. Además, evita algunos problemas típicos de <code>NOT IN</code> cuando hay valores <code>NULL</code>.</p>
+</div>
+
+<h2 id="correlacionadas">11. Subconsultas correlacionadas</h2>
+<p>Una subconsulta correlacionada es una subconsulta que depende de la consulta externa. Es decir: dentro de la subconsulta se usa una columna de la consulta principal.</p>
+
+<pre><code>SELECT c.nombre
+FROM clientes AS c
+WHERE EXISTS (
+    SELECT 1
+    FROM ventas AS v
+    WHERE v.id_cliente = c.id_cliente
+);</code></pre>
+
+<p>La subconsulta usa <code>c.id_cliente</code>, que pertenece a la consulta externa. Por eso no puede entenderse completamente sola: necesita saber qué cliente se está evaluando en ese momento.</p>
+
+<div class="example">
+    <div class="mini-title">Dicho simple</div>
+    <p>SQL toma un cliente de la consulta externa y pregunta: “¿Existe alguna venta para este cliente?”. Luego toma el siguiente cliente y repite la pregunta.</p>
+</div>
+
+<h3>11.1 Producto más caro que el promedio de su propia categoría</h3>
+<p>Esta consulta es muy importante porque muestra una necesidad real de correlación.</p>
+
+<pre><code>SELECT p1.nombre, p1.categoria, p1.precio
+FROM productos AS p1
+WHERE p1.precio &gt; (
+    SELECT AVG(p2.precio)
+    FROM productos AS p2
+    WHERE p2.categoria = p1.categoria
+);</code></pre>
+
+<p>Lectura: mostrar productos cuyo precio sea mayor que el promedio de precio de los productos de su misma categoría.</p>
+
+<div class="question">
+    <div class="mini-title">¿Por qué no alcanza con un promedio general?</div>
+    <p>Porque no estamos comparando contra el promedio de todos los productos. Estamos comparando cada producto contra el promedio de su propia categoría. La subconsulta necesita saber la categoría del producto que se está evaluando afuera.</p>
+</div>
+
+<h3>11.2 Total gastado por cliente usando subconsulta correlacionada</h3>
+<pre><code>SELECT c.nombre,
+       (
+           SELECT SUM(dv.cantidad * dv.precio_unitario)
+           FROM ventas AS v
+           JOIN detalle_ventas AS dv ON dv.id_venta = v.id_venta
+           WHERE v.id_cliente = c.id_cliente
+       ) AS total_gastado
+FROM clientes AS c;</code></pre>
+
+<p>Para cada cliente, la subconsulta calcula el total gastado por ese cliente.</p>
+
+<div class="warning">
+    <div class="mini-title">Atención al rendimiento</div>
+    <p>Las subconsultas correlacionadas pueden ser muy claras, pero en tablas grandes podrían ser más costosas. En muchos casos, una solución con <code>JOIN</code> y <code>GROUP BY</code> puede ser más eficiente. Lo importante al aprender es entender primero la lógica.</p>
+</div>
+
+<h2 id="select-from-having">12. Subconsultas en SELECT, FROM y HAVING</h2>
+
+<h3>12.1 Subconsulta en SELECT</h3>
+<p>Sirve para mostrar un cálculo como una columna adicional.</p>
+
+<pre><code>SELECT c.nombre,
+       (
+           SELECT COUNT(*)
+           FROM ventas AS v
+           WHERE v.id_cliente = c.id_cliente
+       ) AS cantidad_ventas
+FROM clientes AS c;</code></pre>
+
+<p>Por cada cliente se muestra cuántas ventas tiene asociadas.</p>
+
+<h3>12.2 Subconsulta en FROM: tabla derivada</h3>
+<p>Una subconsulta en <code>FROM</code> funciona como una tabla temporal generada en el momento. Es obligatorio darle un alias.</p>
+
+<pre><code>SELECT resumen.id_cliente,
+       resumen.total_gastado
+FROM (
+    SELECT v.id_cliente,
+           SUM(dv.cantidad * dv.precio_unitario) AS total_gastado
+    FROM ventas AS v
+    JOIN detalle_ventas AS dv ON dv.id_venta = v.id_venta
+    GROUP BY v.id_cliente
+) AS resumen
+WHERE resumen.total_gastado &gt; 50000;</code></pre>
+
+<p>La subconsulta crea una tabla derivada llamada <code>resumen</code>. La consulta externa filtra los clientes cuyo total gastado supera 50000.</p>
+
+<div class="warning">
+    <div class="mini-title">Alias obligatorio</div>
+    <p>Cuando una subconsulta se usa en el <code>FROM</code>, debe tener un alias. Si no se escribe <code>AS resumen</code> u otro nombre, muchos motores SQL marcarán error.</p>
+</div>
+
+<h3>12.3 Subconsulta en HAVING</h3>
+<p><code>HAVING</code> filtra grupos. Podemos usar una subconsulta para comparar un resultado agrupado contra un valor calculado.</p>
+
+<pre><code>SELECT v.id_cliente,
+       SUM(dv.cantidad * dv.precio_unitario) AS total_gastado
+FROM ventas AS v
+JOIN detalle_ventas AS dv ON dv.id_venta = v.id_venta
+GROUP BY v.id_cliente
+HAVING SUM(dv.cantidad * dv.precio_unitario) &gt; (
+    SELECT AVG(total_por_cliente)
+    FROM (
+        SELECT v2.id_cliente,
+               SUM(dv2.cantidad * dv2.precio_unitario) AS total_por_cliente
+        FROM ventas AS v2
+        JOIN detalle_ventas AS dv2 ON dv2.id_venta = v2.id_venta
+        GROUP BY v2.id_cliente
+    ) AS totales
+);</code></pre>
+
+<p>Lectura: mostrar clientes cuyo total gastado sea mayor que el promedio de gasto de los clientes que compraron.</p>
+
+<div class="tip">
+    <p>Este ejemplo es más avanzado. Lo importante es reconocer que la subconsulta interna calcula una tabla de totales por cliente y luego la consulta externa compara contra el promedio de esos totales.</p>
+</div>
+
+<h2 id="joins">13. Subconsultas, JOIN, GROUP BY y HAVING</h2>
+<p>No todo problema que se resuelve con subconsulta debe resolverse necesariamente con subconsulta. Muchas veces una consulta puede escribirse de varias formas.</p>
+
+<h3>13.1 Mismo problema con subconsulta IN</h3>
+<pre><code>SELECT nombre
+FROM clientes
+WHERE id_cliente IN (
+    SELECT id_cliente
+    FROM ventas
+);</code></pre>
+
+<h3>13.2 Mismo problema con JOIN</h3>
+<pre><code>SELECT DISTINCT c.nombre
+FROM clientes AS c
+JOIN ventas AS v ON v.id_cliente = c.id_cliente;</code></pre>
+
+<p>Ambas consultas pueden devolver los clientes que realizaron compras. La diferencia está en la forma de pensarlo:</p>
+<ul>
+    <li>Con <code>IN</code>: “mostrar clientes cuyo id esté en la lista de clientes con ventas”.</li>
+    <li>Con <code>JOIN</code>: “unir clientes con ventas y mostrar los que coinciden”.</li>
+</ul>
+
+<h3>13.3 Entonces, ¿cuándo conviene una subconsulta?</h3>
+<table>
+    <thead>
+        <tr><th>Situación</th><th>Puede convenir...</th><th>Por qué</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Necesito comparar contra un cálculo general: promedio, máximo, mínimo.</td><td>Subconsulta escalar.</td><td>La consulta interna calcula un valor y la externa lo usa.</td></tr>
+        <tr><td>Necesito saber si un registro aparece en otra consulta.</td><td><code>IN</code> o <code>EXISTS</code>.</td><td>La pregunta se piensa como pertenencia o existencia.</td></tr>
+        <tr><td>Necesito datos de varias tablas para mostrar columnas de ambas.</td><td><code>JOIN</code>.</td><td>El objetivo principal es combinar información.</td></tr>
+        <tr><td>Necesito calcular totales por grupo.</td><td><code>GROUP BY</code>.</td><td>El problema principal es agrupar.</td></tr>
+        <tr><td>Necesito filtrar grupos ya calculados.</td><td><code>HAVING</code>.</td><td>El filtro depende de funciones de agregación.</td></tr>
+        <tr><td>Necesito trabajar con un resultado intermedio como si fuera una tabla.</td><td>Tabla derivada en <code>FROM</code>.</td><td>Permite separar el cálculo interno de la consulta externa.</td></tr>
+    </tbody>
+</table>
+
+<div class="note">
+    <div class="mini-title">Idea equilibrada</div>
+    <p>La subconsulta no reemplaza siempre al <code>JOIN</code>, ni el <code>JOIN</code> reemplaza siempre a la subconsulta. Son herramientas distintas. Lo importante es elegir la que exprese mejor el problema y permita escribir una consulta clara.</p>
+</div>
+
+<h2 id="errores">14. Errores comunes al usar subconsultas</h2>
+
+<h3>14.1 Usar = con una subconsulta que devuelve varias filas</h3>
+<p>Incorrecto:</p>
+<pre><code>SELECT nombre
+FROM clientes
+WHERE id_cliente = (
+    SELECT id_cliente
+    FROM ventas
+);</code></pre>
+
+<p>La subconsulta puede devolver varios <code>id_cliente</code>. Entonces <code>=</code> no corresponde. Una opción correcta sería:</p>
+<pre><code>SELECT nombre
+FROM clientes
+WHERE id_cliente IN (
+    SELECT id_cliente
+    FROM ventas
+);</code></pre>
+
+<h3>14.2 Olvidar el alias en una tabla derivada</h3>
+<p>Incorrecto:</p>
+<pre><code>SELECT *
+FROM (
+    SELECT id_cliente, COUNT(*) AS cantidad
+    FROM ventas
+    GROUP BY id_cliente
+);</code></pre>
+
+<p>Correcto:</p>
+<pre><code>SELECT *
+FROM (
+    SELECT id_cliente, COUNT(*) AS cantidad
+    FROM ventas
+    GROUP BY id_cliente
+) AS resumen;</code></pre>
+
+<h3>14.3 Confundir WHERE y HAVING</h3>
+<p><code>WHERE</code> filtra filas antes de agrupar. <code>HAVING</code> filtra grupos después de agrupar.</p>
+
+<p>Incorrecto:</p>
+<pre><code>SELECT id_cliente, COUNT(*) AS cantidad_ventas
+FROM ventas
+WHERE COUNT(*) &gt; 1
+GROUP BY id_cliente;</code></pre>
+
+<p>Correcto:</p>
+<pre><code>SELECT id_cliente, COUNT(*) AS cantidad_ventas
+FROM ventas
+GROUP BY id_cliente
+HAVING COUNT(*) &gt; 1;</code></pre>
+
+<h3>14.4 Escribir subconsultas innecesariamente complejas</h3>
+<p>A veces una subconsulta se puede reemplazar por un <code>JOIN</code> más simple o por un <code>GROUP BY</code>. No se trata de usar subconsultas siempre, sino de usarlas cuando ayudan.</p>
+
+<h3>14.5 No probar la subconsulta por separado</h3>
+<p>Una buena práctica es ejecutar primero la consulta interna para ver qué devuelve. Luego se integra dentro de la consulta externa.</p>
+
+<div class="tip">
+    <div class="mini-title">Método recomendado para resolver</div>
+    <ol>
+        <li>Leer el enunciado y detectar qué se pide mostrar.</li>
+        <li>Preguntarse si hay un dato intermedio necesario.</li>
+        <li>Escribir primero la subconsulta sola.</li>
+        <li>Verificar si devuelve un valor, una lista o una tabla.</li>
+        <li>Elegir el operador correcto.</li>
+        <li>Integrarla en la consulta externa.</li>
+    </ol>
+</div>
+
+<h2 id="guia-rapida">15. Guía rápida de decisión</h2>
+<p>Esta tabla sirve como resumen para elegir qué estructura usar.</p>
+
+<table>
+    <thead>
+        <tr><th>Quiero resolver...</th><th>Preguntarme...</th><th>Herramienta probable</th><th>Ejemplo</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Comparar contra un promedio, máximo o mínimo.</td><td>¿La subconsulta devuelve un solo valor?</td><td>Subconsulta escalar.</td><td><code>precio &gt; (SELECT AVG(precio) ...)</code></td></tr>
+        <tr><td>Ver si un valor aparece en un conjunto.</td><td>¿La subconsulta devuelve una lista?</td><td><code>IN</code>.</td><td><code>id IN (SELECT id ...)</code></td></tr>
+        <tr><td>Ver si algo no aparece en un conjunto.</td><td>¿Puede haber NULL?</td><td><code>NOT EXISTS</code> suele ser más seguro.</td><td><code>WHERE NOT EXISTS (...)</code></td></tr>
+        <tr><td>Comparar contra alguno de varios valores.</td><td>¿Alcanza con que se cumpla contra un valor?</td><td><code>ANY</code> / <code>SOME</code>.</td><td><code>precio &gt; ANY (...)</code></td></tr>
+        <tr><td>Comparar contra todos los valores.</td><td>¿Debe cumplirse contra toda la lista?</td><td><code>ALL</code>.</td><td><code>precio &gt; ALL (...)</code></td></tr>
+        <tr><td>Comprobar existencia de registros relacionados.</td><td>¿Solo importa si existen filas?</td><td><code>EXISTS</code>.</td><td><code>WHERE EXISTS (...)</code></td></tr>
+        <tr><td>Usar un resultado intermedio como tabla.</td><td>¿Necesito consultar una consulta?</td><td>Tabla derivada en <code>FROM</code>.</td><td><code>FROM (SELECT ...) AS resumen</code></td></tr>
+    </tbody>
+</table>
+
+<h2>16. Cierre conceptual</h2>
+<p>Una subconsulta no es magia ni una estructura completamente distinta: es una consulta común ubicada dentro de otra consulta. La dificultad aparece cuando debemos decidir qué devuelve esa consulta interna y cómo usar ese resultado.</p>
+
+<div class="note">
+    <div class="mini-title">Resumen final</div>
+    <ul>
+        <li>Si la subconsulta devuelve un solo valor, puedo compararla con operadores como <code>=</code>, <code>&gt;</code> o <code>&lt;</code>.</li>
+        <li>Si devuelve una lista, puedo usar <code>IN</code>, <code>ANY</code>, <code>SOME</code> o <code>ALL</code>.</li>
+        <li>Si solo me importa saber si hay filas relacionadas, conviene pensar en <code>EXISTS</code> o <code>NOT EXISTS</code>.</li>
+        <li>Si la subconsulta depende de la fila actual de la consulta externa, es una subconsulta correlacionada.</li>
+        <li>Si la subconsulta está en el <code>FROM</code>, funciona como tabla derivada y debe tener alias.</li>
+    </ul>
+</div>
+
+<p class="small" style="text-align:center; margin-top:2rem;">Material teórico de subconsultas SQL. Documento base para lectura autónoma y posterior práctica.</p>
+
+</div>
+</body>
+</html>
