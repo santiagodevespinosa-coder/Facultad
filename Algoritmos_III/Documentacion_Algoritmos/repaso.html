@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundamentos de Desarrollo Backend y .NET</title>
+    <style>
+        /* --- VARIABLES DE DISEÑO (Paleta Profesional) --- */
+        :root {
+            --primary-color: #1e3a8a;
+            /* Azul Institucional */
+            --primary-light: #eff6ff;
+            /* Fondo Azul Claro */
+            --secondary-color: #0f172a;
+            /* Pizarra Oscuro (Texto Principal) */
+            --accent-color: #2563eb;
+            /* Azul de Acento */
+            --bg-main: #f8fafc;
+            /* Fondo General de la Página */
+            --bg-card: #ffffff;
+            /* Fondo de Bloques y Tarjetas */
+            --border-color: #e2e8f0;
+            /* Gris de Bordes */
+            --text-muted: #64748b;
+            /* Gris para Textos Secundarios */
+            --code-bg: #1e293b;
+            /* Fondo para Bloques de Código */
+            --code-text: #f8fafc;
+            --success-color: #16a34a;
+            /* Verde Éxito */
+            --error-color: #dc2626;
+            /* Rojo Error */
+            --warning-color: #d97706;
+            /* Ámbar Advertencia */
+        }
+
+        /* --- ESTILOS GENERALES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--secondary-color);
+            background-color: var(--bg-main);
+            padding: 0;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL Y DISEÑO DE DOS COLUMNAS --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+        }
+
+        /* --- CABECERA PRINCIPAL --- */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            grid-column: span 2;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* --- MENÚ DE NAVEGACIÓN FIJO (Índice Flotante) --- */
+        nav {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        nav h2 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav li {
+            margin-bottom: 10px;
+        }
+
+        nav a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: block;
+            padding: 5px 8px;
+            border-left: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent-color);
+            border-left-color: var(--accent-color);
+            background-color: var(--primary-light);
+            padding-left: 12px;
+        }
+
+        /* --- SECCIONES DE CONTENIDO --- */
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .block-section {
+            background-color: var(--bg-card);
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Título del Bloque Principal */
+        .block-title {
+            font-size: 1.85rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .block-intro {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Subtítulos de temas */
+        h3 {
+            font-size: 1.4rem;
+            color: var(--secondary-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        h3::before {
+            content: "•";
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-right: 8px;
+            line-height: 0;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        /* Listas */
+        ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        /* --- COMPONENTES RESALTADOS --- */
+        /* Bloques de Código */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 18px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--text-muted);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        code {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* Cajas de Alertas / Destacados */
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+            margin-right: 5px;
+        }
+
+        .badge-success {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .badge-error {
+            background-color: #fee2e2;
+            color: var(--error-color);
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: var(--warning-color);
+        }
+
+        .correct {
+            border-left: 4px solid var(--success-color);
+            background-color: #f0fdf4;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .incorrect {
+            border-left: 4px solid var(--error-color);
+            background-color: #fef2f2;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                position: relative;
+                top: 0;
+                height: auto;
+            }
+
+            header {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>Plan de Capacitación Técnica Backend</h1>
+            <p>Ejes Educativos Obligatorios: Fundamentos, .NET Core y Persistencia Avanzada</p>
+        </header>
+
+        <nav>
+            <h2>Contenidos</h2>
+            <ul>
+                <li><strong>Bloque 1</strong></li>
+                <li><a href="#b1-intro">Fundamentos e Introducción</a></li>
+                <li><a href="#b1-http">El protocolo HTTP</a></li>
+                <li><a href="#b1-metodos">Métodos y URIs</a></li>
+                <li><a href="#b1-arquitectura">Arquitectura Cliente-Servidor y MVC</a></li>
+                <li><a href="#b1-api">¿Qué es una API y REST?</a></li>
+
+                <li style="margin-top: 15px;"><strong>Bloque 2</strong></li>
+                <li><a href="#b2-intro">Backend con C# y .NET Core</a></li>
+                <li><a href="#b2-middlewares">Pipeline de Middlewares</a></li>
+                <li><a href="#b2-routing">Routing y Controladores</a></li>
+                <li><a href="#b2-di">Inyección de Dependencias</a></li>
+                <li><a href="#b2-patterns">Patrones de Diseño (Repository, DTO)</a></li>
+
+                <li style="margin-top: 15px;"><strong>Bloque 3</strong></li>
+                <li><a href="#b3-intro">Persistencia y Acceso a Datos</a></li>
+                <li><a href="#b3-orm">ORMs vs Micro-ORMs</a></li>
+                <li><a href="#b3-dapper">Manejo de Datos con Dapper</a></li>
+                <li><a href="#b3-sp">Stored Procedures en Dapper</a></li>
+            </ul>
+        </nav>
+
+        <main>
+
+            <section class="block-section" id="b1-intro">
+                <h2 class="block-title">Bloque 1 — Fundamentos de Web, HTTP y Arquitectura</h2>
+                <div class="block-intro">
+                    Antes de comenzar a desarrollar aplicaciones web o APIs en cualquier tecnología, es fundamental
+                    comprender cómo se comunican los sistemas y qué arquitectura existe detrás de una aplicación
+                    moderna. Muchos problemas de diseño, implementación y mantenimiento aparecen cuando estos conceptos
+                    básicos no están claros.
+                    <br><br>
+                    Este bloque introduce tres pilares fundamentales del desarrollo backend:
+                    <ul>
+                        <li>El protocolo HTTP</li>
+                        <li>La arquitectura cliente-servidor y el patrón MVC</li>
+                        <li>El concepto de API y el estilo REST</li>
+                    </ul>
+                </div>
+
+                <h3 id="b1-http">El protocolo HTTP</h3>
+                <p><strong>HTTP (HyperText Transfer Protocol)</strong> es el protocolo utilizado para la comunicación
+                    entre clientes y servidores en la Web. Cada vez que un usuario abre una página, inicia sesión en una
+                    aplicación o consulta información desde un frontend, ocurre una comunicación HTTP.</p>
+                <p>El funcionamiento básico sigue un modelo de <strong>petición y respuesta (request/response)</strong>.
+                    Un cliente realiza una solicitud al servidor y este devuelve una respuesta.</p>
+
+                <p><em>Por ejemplo:</em></p>
+                <ul>
+                    <li>Un navegador solicita una página web.</li>
+                    <li>El servidor procesa la solicitud.</li>
+                    <li>El servidor devuelve el contenido correspondiente.</li>
+                </ul>
+                <p>Aunque originalmente HTTP fue diseñado para transferir documentos HTML, hoy se utiliza para
+                    prácticamente cualquier tipo de intercambio de información, especialmente en APIs REST.</p>
+
+                <h4>Estructura de una petición HTTP</h4>
+                <p>Toda petición HTTP posee una estructura bien definida. Comprenderla es esencial para interpretar cómo
+                    interactúan frontend y backend. Una petición típica contiene:</p>
+                <ul>
+                    <li>Un método HTTP</li>
+                    <li>Una ruta o URI</li>
+                    <li>Headers</li>
+                    <li>Opcionalmente un body</li>
+                </ul>
+
+                <p>Un ejemplo sencillo sería:</p>
+                <pre>POST /productos HTTP/1.1
+Host: tienda.com
+Content-Type: application/json
+
+{
+  "nombre": "Teclado",
+  "precio": 15000
+}</pre>
+                <p>En este caso, el cliente está solicitando crear un producto nuevo.</p>
+
+                <h3 id="b1-metodos">Métodos HTTP</h3>
+                <p>Los métodos HTTP indican la acción que el cliente desea realizar sobre un recurso.</p>
+                <ul>
+                    <li><strong>GET:</strong> Utilizado para obtener información sin modificar nada en el servidor.
+                        <pre>GET /productos</pre>
+                    </li>
+                    <li><strong>POST:</strong> Cuando el objetivo es crear un recurso nuevo.
+                        <pre>POST /productos</pre>
+                    </li>
+                    <li><strong>PUT:</strong> Para actualizar completamente un recurso existente.
+                        <pre>PUT /productos/15</pre>
+                    </li>
+                    <li><strong>PATCH:</strong> Si solo se desea modificar parcialmente un recurso.
+                        <pre>PATCH /productos/15</pre>
+                    </li>
+                    <li><strong>DELETE:</strong> Se utiliza para eliminar recursos.
+                        <pre>DELETE /productos/15</pre>
+                    </li>
+                </ul>
+                <p>Una parte importante del diseño de APIs consiste en utilizar correctamente estos métodos según la
+                    operación realizada.</p>
+
+                <h4>URI o recurso solicitado</h4>
+                <p>La <strong>URI (Uniform Resource Identifier)</strong> identifica el recurso sobre el cual se trabaja.
+                    Por ejemplo: <code>/productos</code>, <code>/productos/15</code>, o
+                    <code>/usuarios/3/pedidos</code>.</p>
+                <p>En aplicaciones REST modernas, las URIs representan recursos y no acciones. Por ese motivo se
+                    prefieren rutas estructuradas:</p>
+                <div class="correct"><strong>Correcto:</strong> <code>/productos</code></div>
+                <div class="incorrect"><strong>Incorrecto:</strong> <code>/obtenerProductos</code></div>
+                <p>La acción ya está expresada mediante el verbo HTTP.</p>
+
+                <h4>Headers HTTP</h4>
+                <p>Los headers contienen metadatos sobre la petición o la respuesta. Permiten especificar información
+                    importante como:</p>
+                <ul>
+                    <li>El tipo de contenido enviado (Content-Type)</li>
+                    <li>El formato esperado</li>
+                    <li>Credenciales de autenticación</li>
+                    <li>Configuración de caché o idioma preferido</li>
+                </ul>
+                <p>Ejemplos comunes:</p>
+                <pre>Content-Type: application/json<br>Authorization: Bearer token_de_seguridad</pre>
+
+                <h4>Body de la petición</h4>
+                <p>El body contiene los datos enviados al servidor. Generalmente se utiliza en operaciones de creación o
+                    modificación. Actualmente, el formato estándar y más utilizado es <strong>JSON</strong>.</p>
+                <pre>{
+  "nombre": "Mouse",
+  "precio": 12000
+}</pre>
+
+                <h4>Respuesta HTTP</h4>
+                <p>Luego de procesar la solicitud, el servidor devuelve una respuesta HTTP que incluye un <strong>Código
+                        de estado</strong>, <strong>Headers</strong> y un <strong>Body</strong>.</p>
+                <pre>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "id": 15,
+  "nombre": "Mouse"
+}</pre>
+
+                <h4>Códigos de estado HTTP</h4>
+                <p>Los códigos de estado indican el resultado de la operación realizada y se agrupan en familias:</p>
+                <ul>
+                    <li><span class="badge badge-success">2xx — Operación exitosa:</span> Indica que la solicitud se
+                        procesó correctamente.
+                        <br><code>200 OK</code> (Éxito), <code>201 Created</code> (Recurso creado),
+                        <code>204 No Content</code> (Éxito sin cuerpo de respuesta).
+                    </li>
+                    <li><span class="badge badge-warning">3xx — Redirecciones:</span> El recurso solicitado cambió de
+                        ubicación.
+                        <br><code>301 Moved Permanently</code>.
+                    </li>
+                    <li><span class="badge badge-error">4xx — Error del cliente:</span> Problemas originados por la
+                        propia solicitud.
+                        <br><code>400 Bad Request</code> (Sintaxis inválida), <code>401 Unauthorized</code> (Falta
+                        autenticación), <code>403 Forbidden</code> (Sin permisos), <code>404 Not Found</code> (No existe
+                        el recurso).
+                    </li>
+                    <li><span class="badge badge-error">5xx — Error del servidor:</span> Fallos internos del propio
+                        servidor.
+                        <br><code>500 Internal Server Error</code> (Excepción inesperada en el backend).
+                    </li>
+                </ul>
+
+                <h4>Statelessness: HTTP es un protocolo sin estado</h4>
+                <p>Una característica fundamental de HTTP es que es <strong>stateless</strong>. Esto significa que el
+                    servidor no recuerda automáticamente solicitudes anteriores realizadas por el mismo cliente. Cada
+                    request es independiente y debe contener toda la información necesaria para ser procesado.</p>
+                <p>Para resolver la persistencia de identidad (por ejemplo, sesiones activas) se implementan mecanismos
+                    como:</p>
+                <ul>
+                    <li>Cookies y Sessions</li>
+                    <li>Tokens JWT (JSON Web Tokens)</li>
+                    <li>Headers de autenticación dedicados</li>
+                </ul>
+
+                <h3 id="b1-arquitectura">Arquitectura Cliente-Servidor</h3>
+                <p>La mayoría de las aplicaciones modernas siguen una arquitectura cliente-servidor estructurada bajo
+                    dos actores principales:</p>
+                <ul>
+                    <li><strong>El cliente:</strong> Quien consume el servicio (Navegadores web, aplicaciones móviles,
+                        frontends en React/Angular, o herramientas como Postman).</li>
+                    <li><strong>El servidor:</strong> Quien procesa la lógica de negocio, accede a bases de datos y
+                        devuelve respuestas.</li>
+                </ul>
+                <pre>Cliente → Request HTTP → Servidor&#10;Cliente ← Response HTTP ← Servidor</pre>
+
+                <h4>Separación de responsabilidades (SoC)</h4>
+                <p>Cada componente del sistema debería encargarse únicamente de una tarea específica. El frontend se
+                    encarga de la interfaz y experiencia de usuario; el backend procesa reglas de negocio; la base de
+                    datos almacena información. Esto permite reducir el acoplamiento, facilitar los tests, mejorar el
+                    mantenimiento e incrementar la escalabilidad del sistema.</p>
+
+                <h4>El patrón MVC (Model-View-Controller)</h4>
+                <p>Es un patrón de arquitectura diseñado para organizar el código separando las responsabilidades de
+                    forma explícita:</p>
+                <ul>
+                    <li><strong>Modelo (Model):</strong> Representa los datos, las entidades (Usuario, Producto) y la
+                        lógica de negocio junto con el acceso a datos.</li>
+                    <li><strong>Vista (View):</strong> Representa la interfaz visual (HTML / Plantillas) que se
+                        renderiza para el usuario.</li>
+                    <li><strong>Controlador (Controller):</strong> Intermediario que recibe el request, coordina las
+                        operaciones invocando al Modelo y selecciona la Vista de respuesta.</li>
+                </ul>
+                <pre>Request → Controller → Model&#10;            ↓&#10;          View</pre>
+
+                <h4>MVC tradicional y aplicaciones modernas</h4>
+                <p>En aplicaciones MVC tradicionales, el servidor genera directamente el código HTML que recibe el
+                    navegador (<code>Browser → Servidor MVC → HTML</code>).</p>
+                <p>Sin embargo, en arquitecturas modernas se opta por separar completamente frontend y backend. El
+                    backend ya no devuelve HTML sino datos puros estructurados en formato JSON
+                    (<code>Frontend React → API REST → Base de Datos</code>).</p>
+
+                <h3 id="b1-api">¿Qué es una API?</h3>
+                <p><strong>API</strong> significa <em>Application Programming Interface</em>. Es una interfaz o contrato
+                    que permite que distintos sistemas aislados se comuniquen entre sí de manera estandarizada,
+                    definiendo qué operaciones existen, cómo invocarlas y qué estructura de datos se retornará.</p>
+
+                <h4>APIs REST</h4>
+                <p><strong>REST (Representational State Transfer)</strong> no es un protocolo ni una tecnología, sino un
+                    estilo arquitectónico basado en un conjunto de principios y buenas prácticas. Las APIs modernas se
+                    diseñan bajo principios <em>RESTful</em>:</p>
+                <ul>
+                    <li><strong>Recursos en REST:</strong> Todo gira alrededor de entidades de dominio expuestas en URIs
+                        limpias (ej. <code>/productos</code>, <code>/usuarios</code>).</li>
+                    <li><strong>Uso correcto de URIs:</strong> Las rutas deben representar recursos (sustantivos) y
+                        jamás acciones (verbos).
+                        <div class="correct"><strong>Correcto:</strong> <code>GET /productos</code>,
+                            <code>DELETE /productos/15</code></div>
+                        <div class="incorrect"><strong>Incorrecto:</strong> <code>POST /getProductos</code>,
+                            <code>POST /deleteCliente</code></div>
+                    </li>
+                    <li><strong>Representación de recursos:</strong> El estándar universal de transferencia es JSON por
+                        ser liviano, legible e independiente del lenguaje emisor/receptor.</li>
+                </ul>
+
+                <h4>Diferencia entre aplicación monolítica y API REST</h4>
+                <p>En un monolito tradicional, el backend maneja la lógica, los datos y la renderización visual en un
+                    solo bloque integrado. En cambio, en una arquitectura basada en APIs REST, el backend desacopla la
+                    lógica y expone únicamente servicios de datos. Esto permite que múltiples clientes heterogéneos
+                    (Web, Apps móviles, sistemas de terceros) consuman la misma lógica de negocio centralizada.</p>
+            </section>
+
+
+            <section class="block-section" id="b2-intro">
+                <h2 class="block-title">Bloque 2 — Backend con C# y .NET Core</h2>
+                <div class="block-intro">
+                    Una vez comprendidos los fundamentos de HTTP, APIs y arquitectura web, el siguiente paso es entender
+                    cómo se implementan esos conceptos dentro del ecosistema de .NET. Actualmente, ASP.NET Core es uno
+                    de los frameworks empresariales líderes gracias a su alto rendimiento, modularidad e integración
+                    nativa con arquitecturas en la nube.
+                </div>
+
+                <h3>APIs en ASP.NET Core</h3>
+                <p>ASP.NET Core permite exponer endpoints HTTP mediante controladores en C#. Un proyecto Web API típico
+                    contiene componentes esenciales configurados desde su inicio.</p>
+
+                <h4>Program.cs</h4>
+                <p>Es el punto de entrada de la aplicación. En versiones modernas de .NET, centraliza la inicialización
+                    de los servicios de inyección de dependencias, la configuración global y el orden de ejecución de la
+                    aplicación.</p>
+                <pre>var builder = WebApplication.CreateBuilder(args);
+
+// Registro de servicios en el contenedor de DI
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Configuración del pipeline de procesamiento HTTP
+app.MapControllers();
+
+app.Run();</pre>
+
+                <h3 id="b2-middlewares">El pipeline de Middlewares</h3>
+                <p>ASP.NET Core procesa las solicitudes HTTP entrantes secuencialmente mediante un **Middleware
+                    Pipeline**. Cada componente intercepta el request, realiza una tarea y decide si continuar al
+                    siguiente paso o cortar el flujo.</p>
+                <pre>Request → Middleware Logging → Middleware Autenticación → Middleware Routing → Controller → Response</pre>
+                <p>Middlewares nativos comunes: Autenticación, Autorización, Manejo global de errores, soporte para CORS
+                    y Redirección HTTPS.</p>
+
+                <h3 id="b2-routing">Routing por atributos</h3>
+                <p>Es el estilo estándar para mapear URLs directas a métodos específicos de C# mediante decoradores o
+                    atributos:</p>
+                <pre>[ApiController]
+[Route("api/productos")]
+public class ProductosController : ControllerBase
+{
+    [HttpGet("{id}")]
+    public IActionResult ObtenerPorId(int id)
+    {
+        return Ok(); // Mapea a: GET api/productos/15
+    }
+}</pre>
+
+                <h4>Controladores en ASP.NET Core</h4>
+                <p>Heredan de <code>ControllerBase</code>, lo que les provee métodos utilitarios para retornar códigos
+                    HTTP de manera estructurada (<code>Ok()</code>, <code>NotFound()</code>, <code>BadRequest()</code>).
+                </p>
+                <p>Para un tipado estricto y documentación clara, se utiliza
+                    <strong><code>ActionResult&lt;T&gt;</code></strong>, facilitando que un mismo endpoint maneje
+                    respuestas polimórficas (como un 200 con datos o un 404 estructurado).</p>
+
+                <h3 id="b2-di">Inyección de Dependencias (Dependency Injection)</h3>
+                <p>ASP.NET Core incluye un contenedor de DI nativo para resolver el acoplamiento rígido de componentes
+                    de software.</p>
+
+                <p><strong>El problema del acoplamiento manual:</strong></p>
+                <div class="incorrect">
+                    <code>private readonly ProductoRepository _repository = new ProductoRepository();</code> (Imposible
+                    de testear con Mocks o reemplazar dinámicamente).</div>
+
+                <p><strong>La solución mediante Abstracción e Inyección por Constructor:</strong></p>
+                <pre>public class ProductoService
+{
+    private readonly IProductoRepository _repository;
+
+    public ProductoService(IProductoRepository repository)
+    {
+        _repository = repository; // Depende de una interfaz, no de una clase concreta
+    }
+}</pre>
+
+                <h4>Ciclos de vida de los servicios (Service Lifetimes)</h4>
+                <ul>
+                    <li><strong>Transient:</strong> Se crea una instancia nueva cada vez que se solicita. Ideal para
+                        lógica ligera sin estado.
+                        <br><code>builder.Services.AddTransient&lt;IMiServicio, MiServicio&gt;();</code>
+                    </li>
+                    <li><strong>Scoped:</strong> Se crea una única instancia por cada ciclo de vida del Request HTTP. Es
+                        el predeterminado para repositorios de datos y contextos transaccionales.
+                        <br><code>builder.Services.AddScoped&lt;IMiServicio, MiServicio&gt;();</code>
+                    </li>
+                    <li><strong>Singleton:</strong> Existe una única instancia compartida para toda la aplicación
+                        durante todo su tiempo de ejecución. Usado para configuraciones fijas o cachés globales.
+                        <br><code>builder.Services.AddSingleton&lt;IMiServicio, MiServicio&gt;();</code>
+                    </li>
+                </ul>
+
+                <h3 id="b2-patterns">Patrones de diseño comunes en APIs</h3>
+
+                <h4>Repository Pattern</h4>
+                <p>Abstrae e independiza por completo la persistencia y las consultas de la lógica de negocio. El resto
+                    del sistema interactúa con contratos abstractos independientes de la tecnología subyacente (ya sea
+                    SQL Server, MongoDB o servicios REST externos).</p>
+                <pre>public interface IProductoRepository
+{
+    Task&lt;Producto&gt; ObtenerPorId(int id);
+    Task Guardar(Producto producto);
+}</pre>
+
+                <h4>Unit of Work (Unidad de Trabajo)</h4>
+                <p>Coordina múltiples operaciones transaccionales para asegurar que todas se confirmen como un único
+                    bloque atómico (Commit) o bien se cancelen de forma conjunta (Rollback), garantizando la
+                    consistencia relacional. <em>Nota:</em> En proyectos que emplean Entity Framework Core, el objeto
+                    <code>DbContext</code> ya implementa este patrón de forma nativa.</p>
+
+                <h4>DTO (Data Transfer Object)</h4>
+                <p>Objetos diseñados con el único fin de transportar datos limpios entre el frontend y el backend,
+                    evitando exponer el modelo directo de la base de datos por razones de seguridad, versionado y
+                    control de mutabilidad.</p>
+                <pre>// Entidad interna de Base de Datos
+public class Usuario { public int Id { get; set; } public string PasswordHash { get; set; } }
+
+// DTO de exposición pública por HTTP
+public class UsuarioDto { public int Id { get; set; } public string Nombre { get; set; } }</pre>
+            </section>
+
+
+            <section class="block-section" id="b3-intro">
+                <h2 class="block-title">Bloque 3 — Persistencia y Acceso a Datos con ORMs y Dapper</h2>
+                <div class="block-intro">
+                    La capa de persistencia se encarga de resolver la diferencia fundamental entre el modelo de objetos
+                    (C#) y el modelo relacional (Tablas SQL), problema conocido en ingeniería de software como el
+                    <strong>Object-Relational Impedance Mismatch</strong>.
+                </div>
+
+                <h3 id="b3-orm">¿Qué es un ORM?</h3>
+                <p>Un <strong>ORM (Object-Relational Mapping)</strong> automatiza la traducción bidireccional entre las
+                    filas de una base de datos relacional y los objetos estructurados en memoria dentro de C#.</p>
+
+                <h4>Enfoques de Acceso a Datos</h4>
+                <table
+                    style="width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border: 1px solid var(--border-color);">
+                    <thead>
+                        <tr
+                            style="background-color: var(--primary-light); border-bottom: 2px solid var(--border-color);">
+                            <th style="padding: 12px; text-align: left;">Característica</th>
+                            <th style="padding: 12px; text-align: left;">ORM Pesado (EF Core)</th>
+                            <th style="padding: 12px; text-align: left;">Micro-ORM (Dapper)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 12px; font-weight: bold;">Generación de SQL</td>
+                            <td style="padding: 12px;">Automática mediante traducción de LINQ</td>
+                            <td style="padding: 12px;">Manual (Escrito explícitamente por el desarrollador)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 12px; font-weight: bold;">Rendimiento</td>
+                            <td style="padding: 12px;">Estándar (Posee sobrecarga por Change Tracking)</td>
+                            <td style="padding: 12px;">Ultra alto (Cercano a ADO.NET nativo)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; font-weight: bold;">Control de Consultas</td>
+                            <td style="padding: 12px;">Abstraído por el Framework</td>
+                            <td style="padding: 12px;">Absoluto sobre el script SQL ejecutado</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 id="b3-dapper">Manejo de Datos con Dapper</h3>
+                <p>Desarrollado originalmente por el equipo de **Stack Overflow**, Dapper se inyecta como un conjunto de
+                    métodos de extensión sumamente ligeros sobre la interfaz estándar <code>IDbConnection</code>.</p>
+
+                <h4>Método Query&lt;T&gt; (Lecturas)</h4>
+                <p>Ejecuta sentencias SQL de selección y mapea las columnas del set de resultados directamente a
+                    propiedades homónimas del objeto tipado.</p>
+                <pre>using var connection = new SqlConnection(connectionString);
+var productos = connection.Query&lt;Producto&gt;("SELECT Id, Nombre FROM Productos");</pre>
+
+                <h4>Método Execute (Escrituras)</h4>
+                <p>Se utiliza para sentencias de manipulación de datos (<code>INSERT</code>, <code>UPDATE</code>,
+                    <code>DELETE</code>) que no devuelven filas informativas, retornando el número entero de filas
+                    afectadas.</p>
+                <pre>connection.Execute("DELETE FROM Productos WHERE Id = @Id", new { Id = 15 });</pre>
+
+                <h4>Seguridad ante todo: Mitigación de SQL Injection</h4>
+                <p>Dapper obliga e incentiva la parametrización correcta mediante objetos anónimos de C#, evitando por
+                    completo la vulnerabilidad crítica de inyección de código malicioso.</p>
+                <div class="correct"><strong>Uso Seguro (Parametrizado):</strong>
+                    <pre>connection.Query&lt;Usuario&gt;("SELECT * FROM Usuarios WHERE Email = @Email", new { Email = email });</pre>
+                </div>
+                <div class="incorrect"><strong>Uso Peligroso (Vulnerable):</strong>
+                    <pre>connection.Query&lt;Usuario&gt;("SELECT * FROM Usuarios WHERE Email = '" + email + "'");</pre>
+                </div>
+
+                <h3 id="b3-sp">Stored Procedures mediante Dapper</h3>
+                <p>Los procedimientos almacenados (código SQL precompilado en el motor) son altamente compatibles y
+                    eficientes cuando se ejecutan a través de Dapper parametrizando de forma explícita el tipo de
+                    comando:</p>
+                <pre>var producto = connection.QueryFirstOrDefault&lt;Producto&gt;(
+    "ObtenerProducto",
+    new { Id = 15 },
+    commandType: CommandType.StoredProcedure
+);</pre>
+                <p>Este enfoque centraliza scripts de optimización complejos directamente en el motor relacional
+                    mientras mantiene el código de C# limpio y seguro.</p>
+            </section>
+
+        </main>
+    </div>
+
+</body>
+
+</html>

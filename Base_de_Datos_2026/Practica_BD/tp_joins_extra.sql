@@ -46,3 +46,4 @@ WHERE
 
 INSERT INTO Alumnos (Nombre, Apellido, Edad, CorreoElectronico) VALUES
 ('Martin', 'Zapata', '30', 'martinz30@gmail.com'),
+('')
