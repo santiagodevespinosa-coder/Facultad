@@ -171,7 +171,7 @@ CREATE PROCEDURE incrementar_saldo_cliente
 )
 BEGIN
 	UPDATE clientes
-    SET saldo = saldo + p_id_cliente
+    SET saldo = saldo + p_cantidad
     WHERE id_cliente = p_id_cliente;
 END //
 
