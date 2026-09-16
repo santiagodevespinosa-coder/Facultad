@@ -147,11 +147,9 @@ END //
 
 DELIMITER ;
 
-SET @saldo_cliente = 0;
+CALL consultar_saldo(4, @mi_saldo);
 
-CALL consultar_saldo(2, @saldo_cliente);
-
-SELECT @saldo_cliente AS 'Saldo_Actual';
+SELECT @mi_saldo AS saldo_consultado;
 
 /*5 Incrementar el saldo de un cliente
 
@@ -164,7 +162,7 @@ Parámetros de entrada:
 
 */
 
-DELIMTIER //
+DELIMITER //
 
 CREATE PROCEDURE incrementar_saldo_cliente
 (
@@ -172,7 +170,110 @@ CREATE PROCEDURE incrementar_saldo_cliente
     IN p_cantidad DECIMAL (10,2)
 )
 BEGIN
-	DECLARE 
+	UPDATE clientes
+    SET saldo = saldo + p_id_cliente
+    WHERE id_cliente = p_id_cliente;
 END //
 
 DELIMITER ;
+
+DROP PROCEDURE incrementar_saldo_cliente;
+
+CALL incrementar_saldo_cliente(4, 10000);
+
+SELECT * FROM clientes;
+
+/*6 Transferir saldo entre clientes
+
+Crear un procedimiento llamado transferir_saldo que permita transferir un saldo de un cliente a otro.
+
+Parámetros de entrada:
+
+    p_origen_id — ID del cliente que transfiere (INT)
+    p_destino_id — ID del cliente que recibe (INT)
+    p_monto — monto a transferir (DECIMAL)
+
+Requisito: controlar que el saldo del cliente origen sea suficiente para realizar la transferencia.
+*/
+
+DELIMITER //
+CREATE PROCEDURE transferir_saldo
+(
+	IN p_origen_id INT,
+    IN p_destino_id INT,
+    IN p_monto DECIMAL (10,2)
+)
+BEGIN
+	DECLARE v_saldo_origen DECIMAL (10,2);
+
+    SELECT saldo INTO v_saldo_origen
+    FROM clientes
+    WHERE id_cliente = p_origen_id;
+    
+    IF v_saldo_origen >= p_monto THEN
+		
+        UPDATE clientes
+        SET saldo = saldo - p_monto
+        WHERE id_cliente = p_origen_id;
+        
+        UPDATE clientes
+        SET saldo = saldo + p_monto
+        WHERE id_cliente = p_origen_id;
+        
+    END IF;
+END //
+DELIMITER ;
+
+DROP PROCEDURE transferir_saldo;
+
+CALL transferir_saldo(4,3, 5000);
+
+SELECT * FROM clientes
+WHERE id_cliente IN (4,3);
+
+/*7 Consultar clientes por rango de saldo
+
+Crear un procedimiento llamado consultar_clientes_por_saldo que devuelva todos los clientes cuyo saldo se encuentre entre dos valores.
+
+Parámetros de entrada:
+
+    p_saldo_min — saldo mínimo (DECIMAL)
+    p_saldo_max — saldo máximo (DECIMAL)
+
+Observación: utilizar la cláusula BETWEEN en la condición WHERE.
+*/
+
+DELIMITER //
+
+CREATE PROCEDURE consultar_clientes_por_saldo
+(
+	IN p_saldo_min DECIMAL (10,2),
+    IN p_saldo_max DECIMAL (10,2)
+)
+BEGIN
+	SELECT *
+    FROM clientes
+    WHERE saldo BETWEEN p_saldo_min AND p_saldo_max;
+END //
+
+DELIMITER ;
+
+CALL consultar_clientes_por_saldo(1000, 10000);
+
+/*8 Registrar una compra
+
+Crear un procedimiento llamado registrar_compra que permita registrar una compra hecha por un cliente.
+
+Parámetros de entrada:
+
+    p_id_cliente — identificador del cliente (INT)
+    p_monto — monto de la compra (DECIMAL)
+
+Acciones a realizar:
+
+    Insertar el registro en la tabla compras (utilizar CURDATE() para la fecha)
+    Actualizar el saldo del cliente restando el monto de la compra
+
+Observación: utilizar LAST_INSERT_ID() para obtener el ID de la compra recién creada y mostrarlo como resultado.
+*/
+
