@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>MySQL: Funciones Definidas por el Usuario (UDF)</title>
+<style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 2rem 2rem 3rem 2rem;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 1.5rem; }
+            body { padding: 1rem 0.5rem; }
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+            border-left: 5px solid #2c6e9e;
+            padding-left: 1rem;
+        }
+        .subhead {
+            color: #334155;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        h2 {
+            font-size: 1.7rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #0c4a6e;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+        }
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        h4 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+            color: #2c3e66;
+        }
+        p { margin-bottom: 1rem; text-align: justify; }
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin: 1.2rem 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 1px solid #334155;
+        }
+        .code-block code { background: none; color: #b9f3ff; font-family: inherit; }
+        pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #eef2ff;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 12px 10px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            vertical-align: top;
+            background-color: #ffffff;
+        }
+        tr:nth-child(even) td { background-color: #f8fafc; }
+        .note {
+            background-color: #fef9e3;
+            border-left: 5px solid #eab308;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .warning {
+            background-color: #fee2e2;
+            border-left: 5px solid #ef4444;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .info {
+            background-color: #e0f2fe;
+            border-left: 5px solid #0284c7;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .success {
+            background-color: #dcfce7;
+            border-left: 5px solid #16a34a;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .inline-code {
+            background-color: #eef2ff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.4rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #b91c1c;
+        }
+        hr {
+            margin: 2rem 0;
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1);
+        }
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 0.85rem;
+            color: #475569;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        ul, ol { margin: 0.8rem 0 1rem 1.8rem; }
+        li { margin: 0.4rem 0; }
+    
+
+        .institutional-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .institutional-text {
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #111827;
+            font-weight: 500;
+        }
+        .institutional-logo {
+            width: 180px;
+            max-width: 34%;
+            height: auto;
+            object-fit: contain;
+        }
+        @media (max-width: 700px) {
+            .institutional-header { gap: 1rem; align-items: flex-start; }
+            .institutional-logo { width: 135px; max-width: 38%; }
+            .institutional-text { font-size: 0.9rem; }
+        }
+
+</style>
+</head>
+<body>
+<div class="container">
+<div class="institutional-header">
+<div class="institutional-text">
+<div>Instituto Argentino de la Empresa</div>
+<div>Analista de Sistemas – 2do año - Bases de Datos</div>
+</div>
+<img alt="HILET" class="institutional-logo" src="data:image/png;base64,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"/>
+</div><h1>Funciones Definidas por el Usuario (UDF) en MySQL</h1>
+<!-- INTRODUCCIÓN -->
+<h2>¿Qué es una función en MySQL?</h2>
+<p>Una <strong>función en MySQL</strong> es un bloque de código SQL que recibe cero o más parámetros de entrada, realiza operaciones y devuelve <strong>un único valor</strong>. Se puede invocar dentro de expresiones SQL, cláusulas <span class="inline-code">SELECT</span>, <span class="inline-code">WHERE</span>, <span class="inline-code">HAVING</span> y otras, de la misma manera que se usan las funciones nativas del motor.</p>
+<p>Las funciones encapsulan lógica reutilizable: en lugar de repetir el mismo cálculo en múltiples consultas, se define una vez y se invoca cuando sea necesario.</p>
+<!-- TIPOS DE FUNCIONES -->
+<h2>Tipos de funciones en MySQL</h2>
+<h3>Funciones escalares (UDF – User Defined Functions)</h3>
+<p>Operan sobre <strong>una sola fila</strong> a la vez y devuelven un único valor. Son el objeto de estudio principal de este apunte.</p>
+<p>Ejemplo de función nativa: <span class="inline-code">UPPER('hola')</span> → devuelve <span class="inline-code">'HOLA'</span>.</p>
+<h3>Funciones nativas escalares más comunes</h3>
+<ul>
+<li><strong>Matemáticas:</strong> <span class="inline-code">ABS(x)</span>, <span class="inline-code">ROUND(x, d)</span>, <span class="inline-code">CEIL(x)</span>, <span class="inline-code">FLOOR(x)</span>, <span class="inline-code">SQRT(x)</span>, <span class="inline-code">MOD(x, y)</span>.</li>
+<li><strong>Cadenas:</strong> <span class="inline-code">UPPER(str)</span>, <span class="inline-code">LOWER(str)</span>, <span class="inline-code">CONCAT(s1, s2)</span>, <span class="inline-code">LENGTH(str)</span>, <span class="inline-code">TRIM(str)</span>, <span class="inline-code">SUBSTRING(str, pos, len)</span>.</li>
+<li><strong>Fecha y hora:</strong> <span class="inline-code">NOW()</span>, <span class="inline-code">CURDATE()</span>, <span class="inline-code">DATE_ADD(date, INTERVAL n unit)</span>, <span class="inline-code">DATEDIFF(d1, d2)</span>, <span class="inline-code">YEAR(date)</span>, <span class="inline-code">MONTH(date)</span>.</li>
+<li><strong>Control de flujo:</strong> <span class="inline-code">IF(cond, verdadero, falso)</span>, <span class="inline-code">COALESCE(v1, v2, ...)</span>, <span class="inline-code">NULLIF(a, b)</span>.</li>
+</ul>
+<h3>Funciones agregadas</h3>
+<p>Operan sobre un <strong>conjunto de filas</strong> y devuelven un valor resumen. No pueden definirse como UDF en MySQL; son nativas del motor.</p>
+<ul>
+<li><span class="inline-code">SUM(col)</span>, <span class="inline-code">AVG(col)</span>, <span class="inline-code">MAX(col)</span>, <span class="inline-code">MIN(col)</span>, <span class="inline-code">COUNT(*)</span> / <span class="inline-code">COUNT(col)</span>.</li>
+</ul>
+<h4>Comparativa: Escalares vs Agregadas</h4>
+<table>
+<thead>
+<tr><th>Característica</th><th>Funciones Escalares</th><th>Funciones Agregadas</th></tr>
+</thead>
+<tbody>
+<tr><td>Operación</td><td>Sobre una sola fila</td><td>Sobre un conjunto de filas</td></tr>
+<tr><td>Resultado</td><td>Un valor por fila procesada</td><td>Un único valor que resume el conjunto</td></tr>
+<tr><td>Uso típico</td><td>Cálculos, transformaciones, validaciones</td><td>Resúmenes, estadísticas, reportes</td></tr>
+<tr><td>Ejemplos</td><td>ABS, ROUND, UPPER, NOW, IF</td><td>SUM, AVG, COUNT, MAX, MIN</td></tr>
+<tr><td>Aplicación típica</td><td><span class="inline-code">SELECT UPPER(nombre) FROM tabla</span></td><td><span class="inline-code">SELECT SUM(precio) FROM tabla</span></td></tr>
+<tr><td>¿Definibles por el usuario?</td><td>Sí (UDF)</td><td>No en MySQL estándar</td></tr>
+</tbody>
+</table>
+<hr/>
+<!-- SINTAXIS BÁSICA -->
+<h2>Sintaxis básica de una UDF</h2>
+<div class="code-block">
+<pre><code>CREATE FUNCTION nombre_funcion(param1 tipo, param2 tipo, ...)
+RETURNS tipo_dato_retorno
+[DETERMINISTIC | NOT DETERMINISTIC]
+[NO SQL | READS SQL DATA | MODIFIES SQL DATA]
+BEGIN
+    -- declaración de variables locales (opcional)
+    DECLARE variable tipo DEFAULT valor;
+
+    -- lógica de la función
+    -- ...
+
+    RETURN expresion_o_variable;
+END;</code></pre>
+</div>
+<div class="info"><strong>Características de la función:</strong> MySQL permite indicar si una función es <span class="inline-code">DETERMINISTIC</span> o <span class="inline-code">NOT DETERMINISTIC</span>, y si no accede a tablas (<span class="inline-code">NO SQL</span>) o solamente las consulta (<span class="inline-code">READS SQL DATA</span>). Declararlas de forma explícita ayuda a describir correctamente el comportamiento de la función. En algunos servidores con binary log activo, estas características también pueden ser necesarias para permitir su creación.</div>
+<h3>Las dos dimensiones de las características</h3>
+<p>Las características de una UDF se declaran en dos dimensiones independientes que responden a preguntas distintas:</p>
+<ul>
+<li><strong>¿Es predecible el resultado?</strong> → <span class="inline-code">DETERMINISTIC</span> o <span class="inline-code">NOT DETERMINISTIC</span></li>
+<li><strong>¿Accede a datos de tablas?</strong> → <span class="inline-code">NO SQL</span>, <span class="inline-code">READS SQL DATA</span> o <span class="inline-code">MODIFIES SQL DATA</span></li>
+</ul>
+<p>Ambas se pueden (y deben) combinar cuando corresponda. Por ejemplo: <span class="inline-code">NOT DETERMINISTIC READS SQL DATA</span>.</p>
+<h3>Delimitadores</h3>
+<p>Dado que el cuerpo de la función contiene punto y coma (<span class="inline-code">;</span>), es necesario cambiar el delimitador antes de crear la función para que el cliente MySQL no interprete cada <span class="inline-code">;</span> interno como el fin del comando:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION nombre_funcion(...)
+RETURNS tipo
+DETERMINISTIC
+BEGIN
+    DECLARE resultado tipo;
+    -- lógica
+    RETURN resultado;
+END //
+
+DELIMITER ;</code></pre>
+</div>
+<hr/>
+<!-- EJEMPLO BÁSICO -->
+<h2>Primer ejemplo: UDF determinística simple</h2>
+<p>La siguiente función calcula el precio con descuento del 10%:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION calcular_descuento(precio DECIMAL(7,2))
+RETURNS DECIMAL(7,2)
+DETERMINISTIC
+BEGIN
+    DECLARE descuento DECIMAL(7,2);
+    SET descuento = precio * 0.10;
+    RETURN precio - descuento;
+END //
+
+DELIMITER ;
+
+-- Invocación:
+SELECT calcular_descuento(1500.00);   -- Resultado: 1350.00
+SELECT nombre, precio, calcular_descuento(precio) AS precio_final
+FROM productos;</code></pre>
+</div>
+<hr/>
+<!-- DETERMINISMO Y CARACTERÍSTICAS DE ACCESO A DATOS -->
+<h2>Características de la función: determinismo y acceso a datos</h2>
+<p>Cuando se declara una UDF, MySQL exige información sobre dos aspectos de su comportamiento. Esta información no es solo formal: el motor la usa para optimizar la ejecución y garantizar la coherencia en entornos con replicación.</p>
+<hr/>
+<h3>Primera dimensión: ¿es predecible el resultado?</h3>
+<p>Esta dimensión responde a la pregunta: <em>si llamo a la función dos veces con los mismos parámetros, ¿obtengo siempre el mismo valor?</em></p>
+<h4>DETERMINISTIC</h4>
+<p>Se declara <span class="inline-code">DETERMINISTIC</span> cuando, dados los mismos valores de entrada, la función <strong>siempre produce el mismo resultado</strong>, independientemente del momento en que se ejecute, del estado de las tablas o de variables del sistema. El resultado depende exclusivamente de los parámetros recibidos.</p>
+<p>Ejemplos de funciones determinísticas:</p>
+<ul>
+<li>Una función que calcula <span class="inline-code">precio * 0.10</span>: con el mismo <span class="inline-code">precio</span>, siempre devuelve el mismo valor.</li>
+<li>Una función que convierte Celsius a Fahrenheit: pura aritmética, sin estado externo.</li>
+<li>Una función que concatena nombre y apellido con un formato fijo.</li>
+</ul>
+<div class="code-block">
+<pre><code>CREATE FUNCTION celsius_a_fahrenheit(grados DECIMAL(5,2))
+RETURNS DECIMAL(5,2)
+DETERMINISTIC          -- mismos grados → mismo resultado, siempre
+NO SQL                 -- no toca ninguna tabla
+BEGIN
+    RETURN (grados * 9/5) + 32;
+END;</code></pre>
+</div>
+<h4>NOT DETERMINISTIC</h4>
+<p>Se declara <span class="inline-code">NOT DETERMINISTIC</span> cuando la función puede devolver <strong>resultados distintos con los mismos parámetros</strong>, porque depende de algo externo que puede cambiar: el reloj del sistema, un valor aleatorio, o el contenido actual de una tabla.</p>
+<p>Ejemplos de funciones no determinísticas:</p>
+<ul>
+<li><span class="inline-code">NOW()</span> y <span class="inline-code">CURDATE()</span>: dependen del reloj en el momento de ejecución.</li>
+<li><span class="inline-code">RAND()</span>: genera un número distinto en cada llamada.</li>
+<li>Una función que lee el saldo de una cuenta bancaria: si la tabla se modifica entre dos llamadas, el resultado cambia aunque el parámetro sea el mismo ID.</li>
+</ul>
+<div class="code-block">
+<pre><code>CREATE FUNCTION obtener_timestamp_actual()
+RETURNS DATETIME
+NOT DETERMINISTIC      -- cada llamada puede devolver un valor diferente
+NO SQL
+BEGIN
+    RETURN NOW();
+END;</code></pre>
+</div>
+<div class="note">
+<strong>Valor por defecto:</strong> Si no se declara ninguna de las dos opciones, MySQL asume <span class="inline-code">NOT DETERMINISTIC</span>. Esto es conservador pero puede impedir optimizaciones. Siempre es mejor declararlo explícitamente.
+    </div>
+<div class="warning">
+<strong>¿Qué pasa si declaro DETERMINISTIC pero la función en realidad no lo es?</strong><br/><br/>
+        La función <strong>se crea sin errores y ejecuta sin problemas en condiciones normales</strong>. MySQL no verifica si la declaración es correcta: confía en lo que el desarrollador escribió. El problema aparece en escenarios específicos donde esa declaración tiene consecuencias reales:
+        <ul style="margin-top:0.5rem;">
+<li><strong>Optimización incorrecta:</strong> el motor puede cachear el resultado de la primera llamada y reutilizarlo para filas siguientes, asumiendo que siempre va a ser el mismo. Si la función lee una tabla, el resultado cacheado puede ser incorrecto para otras filas.</li>
+<li><strong>Replicación inconsistente:</strong> en un servidor con replicación, MySQL puede omitir re-ejecutar la función en el esclavo (asumiendo que dará el mismo resultado). Si los datos del esclavo difieren levemente del maestro en el momento de la replicación, los resultados pueden divergir silenciosamente.</li>
+</ul>
+        En resumen: declarar <span class="inline-code">DETERMINISTIC</span> en una función que en realidad no lo es <strong>no rompe nada a simple vista</strong>, pero puede producir <strong>resultados incorrectos difíciles de detectar</strong> en producción. Es un bug silencioso.
+    </div>
+<div class="info">
+<strong>¿Por qué importa esto para MySQL?</strong>
+<ul>
+<li><strong>Optimización del query:</strong> el motor puede evaluar una función determinística una sola vez por grupo de filas idénticas, en lugar de llamarla para cada fila.</li>
+<li><strong>Replicación maestro-esclavo:</strong> en replicación basada en sentencias (<em>statement-based replication</em>), MySQL necesita saber si una función es predecible. Si no lo es, la sentencia podría producir resultados diferentes al reejecutarse en el esclavo, rompiendo la coherencia. Una función marcada como <span class="inline-code">DETERMINISTIC</span> puede replicarse de forma segura.</li>
+<li><strong>Binary log:</strong> es el registro binario donde MySQL anota todas las operaciones que modifican datos (INSERT, UPDATE, DELETE, etc.). Este archivo es fundamental para la replicación y la recuperación ante fallos. Si el servidor tiene activado el binary log y la función no está marcada como <span class="inline-code">DETERMINISTIC</span> ni como <span class="inline-code">NO SQL</span> / <span class="inline-code">READS SQL DATA</span>, MySQL bloquea la creación por defecto (a menos que el administrador habilite <span class="inline-code">log_bin_trust_function_creators</span>).</li>
+</ul>
+</div>
+<hr/>
+<h3>Segunda dimensión: ¿qué hace la función con las tablas?</h3>
+<p>Esta dimensión responde a: <em>¿la función accede a tablas? ¿las lee? ¿las modifica?</em> Hay tres opciones:</p>
+<h4>NO SQL</h4>
+<p>La función <strong>no contiene ninguna sentencia SQL</strong> de ningún tipo. No lee ni escribe tablas, ni siquiera ejecuta un <span class="inline-code">SELECT</span>. Opera únicamente con los parámetros recibidos y expresiones aritméticas o de cadena.</p>
+<p>Se combina naturalmente con <span class="inline-code">DETERMINISTIC</span>, ya que si no hay acceso a datos externos, el resultado solo puede depender de los parámetros.</p>
+<div class="code-block">
+<pre><code>CREATE FUNCTION calcular_iva(precio DECIMAL(10,2), tasa DECIMAL(4,2))
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+NO SQL             -- pura aritmética, sin acceso a tablas
+BEGIN
+    RETURN precio * tasa;
+END;</code></pre>
+</div>
+<h4>READS SQL DATA</h4>
+<p>La función contiene sentencias <span class="inline-code">SELECT</span> que <strong>leen datos de tablas</strong>, pero no los modifica. No ejecuta INSERT, UPDATE ni DELETE.</p>
+<p>Este es el caso típico de funciones que consultan información de la base de datos para realizar un cálculo o buscar un valor. Como el contenido de las tablas puede cambiar entre llamadas, suelen combinarse con <span class="inline-code">NOT DETERMINISTIC</span>, aunque si los datos consultados son estáticos (tablas de configuración que no cambian), podría argumentarse que son determinísticas.</p>
+<div class="code-block">
+<pre><code>CREATE FUNCTION obtener_precio_lista(p_producto_id INT)
+RETURNS DECIMAL(10,2)
+NOT DETERMINISTIC      -- el precio en tabla puede cambiar
+READS SQL DATA         -- hace un SELECT sobre la tabla productos
+BEGIN
+    DECLARE precio DECIMAL(10,2);
+    SELECT precio_venta INTO precio
+    FROM productos
+    WHERE producto_id = p_producto_id;
+    RETURN IFNULL(precio, 0.00);
+END;</code></pre>
+</div>
+<h4>MODIFIES SQL DATA</h4>
+<p>Indica que la función contiene sentencias que <strong>modifican datos</strong> (INSERT, UPDATE, DELETE, DROP, etc.). En la práctica, <strong>MySQL no permite ejecutar DML dentro de funciones</strong> que sean llamadas desde un SELECT u otras expresiones SQL, por lo que declarar <span class="inline-code">MODIFIES SQL DATA</span> en una UDF generará un error en tiempo de ejecución si la función efectivamente intenta modificar datos.</p>
+<p>Esta característica existe en el estándar SQL y tiene uso real en procedimientos almacenados, pero en funciones UDF su aplicación práctica en MySQL es muy limitada. Se incluye aquí por completitud.</p>
+<div class="note">
+<strong>Nota técnica sobre DML en UDF:</strong> Si bien es posible declarar <span class="inline-code">MODIFIES SQL DATA</span> y escribir sentencias DML dentro de una función, el motor rechazará la función si se invoca desde una expresión SQL (como un <span class="inline-code">SELECT</span>). En la práctica, las UDF no están diseñadas para modificar datos, y ningún estándar académico ni profesional recomienda hacerlo. Por eso, en este apunte se afirma que "no se puede", asumiendo el contexto de uso cotidiano.
+    </div>
+<div class="warning">
+<strong>Regla práctica:</strong> Si necesitás modificar datos (INSERT / UPDATE / DELETE), <strong>usá un procedimiento almacenado</strong>, no una función. Las UDF están diseñadas para calcular y devolver un valor, no para alterar el estado de la base de datos.
+    </div>
+<hr/>
+<h3>Tabla resumen: combinaciones más frecuentes</h3>
+<table>
+<thead>
+<tr>
+<th>Combinación</th>
+<th>¿Cuándo usarla?</th>
+<th>Ejemplo típico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="inline-code">DETERMINISTIC NO SQL</span></td>
+<td>Función de cálculo puro, sin acceso a tablas</td>
+<td>Conversión de unidades, cálculo de descuento fijo, formateo de cadenas</td>
+</tr>
+<tr>
+<td><span class="inline-code">NOT DETERMINISTIC READS SQL DATA</span></td>
+<td>Función que consulta una tabla cuyo contenido puede variar</td>
+<td>Obtener stock, precio, nombre de un registro por ID</td>
+</tr>
+<tr>
+<td><span class="inline-code">NOT DETERMINISTIC NO SQL</span></td>
+<td>Función sin tablas pero con resultado variable (reloj, azar)</td>
+<td>Función que devuelve NOW() o RAND()</td>
+</tr>
+<tr>
+<td><span class="inline-code">DETERMINISTIC READS SQL DATA</span></td>
+<td>Función que lee una tabla que se sabe estática (tablas de configuración)</td>
+<td>Obtener un parámetro del sistema que nunca cambia</td>
+</tr>
+</tbody>
+</table>
+<h3>Ejemplos de NOT DETERMINISTIC definidas por el usuario</h3>
+<h4>Caso 1 – NOT DETERMINISTIC por uso de NOW() o RAND()</h4>
+<p>La no determinismo viene de funciones nativas del motor cuyo resultado varía en cada ejecución, no de los parámetros de entrada. La siguiente función genera un código de seguimiento combinando un prefijo recibido como parámetro con la fecha y hora actuales:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION generar_codigo_seguimiento(prefijo VARCHAR(10))
+RETURNS VARCHAR(30)
+NOT DETERMINISTIC   -- NOW() cambia en cada llamada
+NO SQL
+BEGIN
+    -- Aunque el parámetro sea el mismo, el resultado varía
+    -- porque NOW() devuelve el instante actual de ejecución.
+    -- Ejemplo: 'ORD-20240915-143022', 'ORD-20240915-143055'
+    RETURN CONCAT(prefijo, '-', DATE_FORMAT(NOW(), '%Y%m%d-%H%i%s'));
+END //
+
+DELIMITER ;
+
+-- Dos llamadas con el mismo parámetro producen resultados distintos:
+SELECT generar_codigo_seguimiento('ORD');  -- ORD-20240915-143022
+SELECT generar_codigo_seguimiento('ORD');  -- ORD-20240915-143055</code></pre>
+</div>
+<p>Otro ejemplo con <span class="inline-code">RAND()</span>: función que asigna un número de turno aleatorio dentro de un rango:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION asignar_turno(min_turno INT, max_turno INT)
+RETURNS INT
+NOT DETERMINISTIC   -- RAND() produce un valor distinto en cada llamada
+NO SQL
+BEGIN
+    -- FLOOR(RAND() * (max - min + 1)) + min genera un entero en [min, max]
+    RETURN FLOOR(RAND() * (max_turno - min_turno + 1)) + min_turno;
+END //
+
+DELIMITER ;
+
+SELECT asignar_turno(1, 100);  -- puede devolver 47
+SELECT asignar_turno(1, 100);  -- puede devolver 83 (mismo parámetro, distinto resultado)</code></pre>
+</div>
+<h4>Caso 2 – NOT DETERMINISTIC por lógica propia de la función (sin NOW ni RAND)</h4>
+<p>Una función puede ser no determinística sin usar ninguna función variable del motor. El no determinismo surge de la <strong>lógica de negocio</strong>: el resultado depende del estado actual de una tabla, que puede cambiar entre llamadas.</p>
+<p>La siguiente función devuelve la categoría de un cliente según la cantidad de compras que tiene registradas en ese momento:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION categorizar_cliente(p_cliente_id INT)
+RETURNS VARCHAR(20)
+NOT DETERMINISTIC   -- el resultado cambia si el cliente hace nuevas compras
+READS SQL DATA      -- consulta la tabla ventas
+BEGIN
+    DECLARE total_compras INT;
+    DECLARE categoria VARCHAR(20);
+
+    SELECT COUNT(*) INTO total_compras
+    FROM ventas
+    WHERE cliente_id = p_cliente_id;
+
+    IF total_compras = 0 THEN
+        SET categoria = 'Nuevo';
+    ELSEIF total_compras &lt; 5 THEN
+        SET categoria = 'Ocasional';
+    ELSEIF total_compras &lt; 20 THEN
+        SET categoria = 'Frecuente';
+    ELSE
+        SET categoria = 'VIP';
+    END IF;
+
+    RETURN categoria;
+END //
+
+DELIMITER ;
+
+-- Hoy, con 3 compras registradas:
+SELECT categorizar_cliente(42);   -- devuelve 'Ocasional'
+
+-- Mañana, si el cliente hizo 2 compras más (total: 5):
+SELECT categorizar_cliente(42);   -- devuelve 'Frecuente'
+-- Mismo parámetro (42), resultado diferente → NOT DETERMINISTIC</code></pre>
+</div>
+<div class="info">
+<strong>Diferencia clave entre los dos casos:</strong>
+<ul>
+<li><strong>Caso 1 (NOW / RAND):</strong> el no determinismo viene de funciones nativas que dependen del tiempo o del azar. La tabla de datos no interviene.</li>
+<li><strong>Caso 2 (lógica propia):</strong> el no determinismo viene del estado actual de la base de datos. La función es pura en su lógica (misma cantidad de compras → misma categoría), pero los datos consultados pueden haber cambiado.</li>
+</ul>
+        En ambos casos se declara <span class="inline-code">NOT DETERMINISTIC</span>, pero las razones son distintas. Entender la diferencia ayuda a diseñar mejor las funciones y a anticipar su comportamiento en producción.
+    </div>
+<hr/>
+<!-- VARIABLES Y CONTROL DE FLUJO -->
+<h2>Variables locales y control de flujo en UDFs</h2>
+<p>Las funciones pueden utilizar variables locales (<span class="inline-code">DECLARE</span>), estructuras condicionales (<span class="inline-code">IF / ELSEIF / ELSE</span>) y expresiones <span class="inline-code">CASE</span>.</p>
+<h3>Ejemplo: IF / ELSEIF</h3>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION clasificar_precio(precio DECIMAL(10,2))
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    DECLARE categoria VARCHAR(20);
+    IF precio &lt; 500 THEN
+        SET categoria = 'Económico';
+    ELSEIF precio &lt; 2000 THEN
+        SET categoria = 'Intermedio';
+    ELSE
+        SET categoria = 'Premium';
+    END IF;
+    RETURN categoria;
+END //
+
+DELIMITER ;
+
+-- Uso:
+SELECT nombre, precio, clasificar_precio(precio) AS categoria
+FROM productos;</code></pre>
+</div>
+<h3>Ejemplo: CASE dentro de una función</h3>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE FUNCTION estado_stock(cantidad INT)
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN
+    RETURN CASE
+        WHEN cantidad = 0 THEN 'Sin stock'
+        WHEN cantidad &lt; 10 THEN 'Stock bajo'
+        WHEN cantidad &lt; 50 THEN 'Stock normal'
+        ELSE 'Stock alto'
+    END;
+END //
+
+DELIMITER ;</code></pre>
+</div>
+<!-- NOTA ACLARATORIA SOBRE HANDLERS -->
+<div class="note">
+<strong>Nota sobre manejadores de error (handlers) en UDF:</strong><br/>
+        Si bien MySQL <em>permite técnicamente</em> declarar <span class="inline-code">DECLARE ... HANDLER</span> dentro de una función, en la práctica es una <strong>mala práctica</strong> en entornos académicos y profesionales. Los handlers en UDF no pueden realizar <span class="inline-code">ROLLBACK</span> (las funciones no soportan transacciones), no pueden lanzar excepciones controladas hacia la consulta que llama a la función, y suelen generar comportamientos confusos. Por eso, en este apunte se recomienda <strong>no usar handlers dentro de UDF</strong> y reservarlos para procedimientos almacenados, donde sí tienen sentido y pueden manejarse con transacciones.
+    </div>
+<hr/>
+<!-- FUNCIONES CON MÚLTIPLES PARÁMETROS -->
+<h2>Función con múltiples parámetros</h2>
+<p>El siguiente ejemplo calcula el precio final de una venta aplicando descuento e impuesto:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+-- Nota: esta función lee de una tabla, por lo que se declara READS SQL DATA
+CREATE FUNCTION calcular_precio_final(
+    p_venta_id INT,
+    p_descuento DECIMAL(5,4),
+    p_impuesto  DECIMAL(5,4)
+)
+RETURNS DECIMAL(10,2)
+READS SQL DATA
+BEGIN
+    DECLARE subtotal DECIMAL(10,2);
+    SELECT precio * cantidad INTO subtotal
+    FROM ventas
+    WHERE venta_id = p_venta_id;
+    RETURN subtotal * (1 - p_descuento) * (1 + p_impuesto);
+END //
+
+DELIMITER ;
+
+-- Invocación directa:
+SELECT calcular_precio_final(10, 0.10, 0.21);  -- 10% descuento, 21% IVA</code></pre>
+</div>
+<hr/>
+<!-- INTEGRACIÓN CON OTROS OBJETOS -->
+<h2>Integración con procedimientos almacenados</h2>
+<p>Una UDF puede ser llamada desde dentro de un procedimiento almacenado para delegar cálculos puntuales:</p>
+<div class="code-block">
+<pre><code>DELIMITER //
+
+CREATE PROCEDURE actualizar_precio_final(
+    p_venta_id  INT,
+    p_descuento DECIMAL(5,4),
+    p_impuesto  DECIMAL(5,4)
+)
+BEGIN
+    UPDATE ventas
+    SET precio_final = calcular_precio_final(p_venta_id, p_descuento, p_impuesto)
+    WHERE venta_id = p_venta_id;
+END //
+
+DELIMITER ;
+
+-- Llamada al procedimiento:
+CALL actualizar_precio_final(10, 0.10, 0.21);</code></pre>
+</div>
+<div class="warning">
+<strong>Restricción importante:</strong> Las funciones definidas por el usuario en MySQL <strong>no pueden realizar operaciones DML directas</strong> (INSERT, UPDATE, DELETE) sobre tablas. Están diseñadas exclusivamente para cálculos y lecturas. Si se necesita modificar datos, la lógica de modificación debe estar en un procedimiento almacenado; la UDF puede ser invocada por ese procedimiento para los cálculos intermedios.
+    </div>
+<hr/>
+<!-- GESTIÓN DE UDFs -->
+<h2>Gestión de funciones: consultar, modificar y eliminar</h2>
+<h3>Consultar funciones existentes</h3>
+<div class="code-block">
+<pre><code>-- Ver todas las funciones de la base de datos actual:
+SHOW FUNCTION STATUS WHERE Db = 'nombre_base_datos';
+
+-- Ver el código fuente de una función:
+SHOW CREATE FUNCTION nombre_funcion;</code></pre>
+</div>
+<h3>Modificar una función</h3>
+<p>MySQL no tiene <span class="inline-code">ALTER FUNCTION</span> para modificar el cuerpo. Se debe eliminar y recrear:</p>
+<div class="code-block">
+<pre><code>DROP FUNCTION IF EXISTS nombre_funcion;
+
+-- Luego CREATE FUNCTION con la nueva lógica...</code></pre>
+</div>
+<h3>Eliminar una función</h3>
+<div class="code-block">
+<pre><code>DROP FUNCTION nombre_funcion;
+
+-- Con verificación previa:
+DROP FUNCTION IF EXISTS nombre_funcion;</code></pre>
+</div>
+<hr/>
+<!-- OTROS TIPOS DE FUNCIONES -->
+<h2>Otros tipos de funciones en MySQL (referencia)</h2>
+<p>Además de las UDF escalares, MySQL incluye otras categorías de funciones que conviene conocer:</p>
+<table>
+<thead><tr><th>Tipo</th><th>Ejemplos</th><th>Uso</th></tr></thead>
+<tbody>
+<tr><td><strong>Ventana / Analíticas</strong></td><td>ROW_NUMBER(), RANK(), DENSE_RANK(), SUM() OVER(), LAG(), LEAD()</td><td>Cálculos sobre particiones de filas sin colapsar el resultado</td></tr>
+<tr><td><strong>JSON</strong></td><td>JSON_EXTRACT(), JSON_ARRAYAGG(), JSON_OBJECT()</td><td>Manejo de datos semiestructurados JSON</td></tr>
+<tr><td><strong>Información del sistema</strong></td><td>USER(), DATABASE(), VERSION()</td><td>Metadatos del entorno actual</td></tr>
+<tr><td><strong>Control de flujo</strong></td><td>IF(), CASE, COALESCE(), IFNULL()</td><td>Lógica condicional dentro de consultas</td></tr>
+<tr><td><strong>Cifrado / Seguridad</strong></td><td>SHA2(), MD5(), AES_ENCRYPT()</td><td>Hash y encriptación de datos sensibles</td></tr>
+<tr><td><strong>Espaciales</strong></td><td>ST_DISTANCE(), ST_CONTAINS()</td><td>Datos geográficos y geométricos</td></tr>
+</tbody>
+</table>
+<hr/>
+<!-- COMPARACIÓN UDF vs SP -->
+<h2>Comparación: UDF vs Procedimientos Almacenados (SP)</h2>
+<table>
+<thead><tr><th>Característica</th><th>Funciones (UDF)</th><th>Procedimientos Almacenados (SP)</th></tr></thead>
+<tbody>
+<tr><td>Propósito principal</td><td>Calcular y devolver un valor</td><td>Realizar múltiples operaciones (DML, transacciones)</td></tr>
+<tr><td>Uso en expresiones SQL</td><td>Sí (SELECT, WHERE, HAVING, ORDER BY)</td><td>No (se invoca con CALL)</td></tr>
+<tr><td>Retorno de valor</td><td>Sí, un único valor escalar</td><td>No directamente; usa parámetros OUT o result sets</td></tr>
+<tr><td>Puede hacer DML (INSERT/UPDATE/DELETE)</td><td>No</td><td>Sí</td></tr>
+<tr><td>Puede usar transacciones</td><td>No</td><td>Sí</td></tr>
+<tr><td>Puede tener handlers de error</td><td>Técnicamente sí, pero se desaconseja totalmente en la práctica (no maneja transacciones, dificulta la depuración). En un curso académico se enseña a no usarlos en UDF.</td><td>Sí</td></tr>
+<tr><td>Sintaxis de creación</td><td>CREATE FUNCTION ... RETURNS</td><td>CREATE PROCEDURE</td></tr>
+</tbody>
+</table>
+<h3>¿Cuándo usar una UDF?</h3>
+<ul>
+<li>Cálculos simples o transformaciones reutilizables (descuentos, impuestos, conversiones).</li>
+<li>Validaciones que devuelven un valor booleano o numérico.</li>
+<li>Cuando el resultado debe usarse directamente dentro de una expresión SQL.</li>
+<li>Para encapsular lógica de presentación (formateo de nombres, fechas).</li>
+</ul>
+<h3>¿Cuándo usar un procedimiento almacenado?</h3>
+<ul>
+<li>Operaciones que modifican datos (INSERT / UPDATE / DELETE en una o más tablas).</li>
+<li>Procesos de negocio con múltiples pasos y control de flujo complejo.</li>
+<li>Cuando se necesita manejo de errores (<span class="inline-code">DECLARE ... HANDLER</span>).</li>
+<li>Procesos transaccionales (COMMIT / ROLLBACK).</li>
+</ul>
+<hr/>
+<!-- RELACIÓN CON OTROS OBJETOS -->
+<h2>Relación de las UDF con otros objetos de base de datos</h2>
+<table>
+<thead>
+<tr><th>Objeto</th><th>Relación con UDF</th><th>¿Qué puede hacer?</th><th>¿Qué NO puede hacer?</th></tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UDF</strong></td>
+<td>Autónoma; invocable desde SP, triggers, vistas, CTE</td>
+<td>Devolver un valor, usarse en SELECT/WHERE/HAVING, transformaciones</td>
+<td>usar handlers de error de forma segura (aunque MySQL los permite, se desaconsejan porque no pueden realizar rollback ni controlar transacciones; para eso existe el procedimiento almacenado)</td>
+</tr>
+<tr>
+<td><strong>Procedimientos (SP)</strong></td>
+<td>Pueden invocar UDF para cálculos puntuales</td>
+<td>Ejecutar tareas complejas, DML, transacciones, cursores</td>
+<td>No se invocan desde SELECT; no devuelven valor como función</td>
+</tr>
+<tr>
+<td><strong>Triggers</strong></td>
+<td>Pueden llamar UDF para lógica de cálculo</td>
+<td>Responder automáticamente a eventos DML</td>
+<td>No se invocan directamente; dependen de eventos de tabla</td>
+</tr>
+<tr>
+<td><strong>Vistas</strong></td>
+<td>Pueden incluir llamadas a UDF en su definición</td>
+<td>Ofrecer abstracción y simplificar el acceso a datos</td>
+<td>No aceptan parámetros; no realizan DML directamente</td>
+</tr>
+<tr>
+<td><strong>CTE</strong></td>
+<td>Una UDF puede ser invocada dentro de una CTE</td>
+<td>Crear subconsultas temporales reutilizables, jerarquías</td>
+<td>Solo existen durante la ejecución de la consulta; no persisten</td>
+</tr>
+</tbody>
+</table>
+<div class="success">
+<strong>Conclusión:</strong> Las UDF determinísticas mejoran el rendimiento, la legibilidad y la mantenibilidad del código SQL. Encapsulan lógica de cálculo reutilizable que puede invocarse desde SELECT, procedimientos, triggers y CTE. Siempre especificá si una función es <span class="inline-code">DETERMINISTIC</span>, <span class="inline-code">NOT DETERMINISTIC</span> o <span class="inline-code">READS SQL DATA</span> para ayudar al optimizador y a otros desarrolladores.
+    </div>
+<footer>Instituto Argentino de la Empresa · Analista de Sistemas · 2do año · Bases de Datos | Apunte: Funciones Definidas por el Usuario (UDF) en MySQL</footer>
+</div>
+</body>
+</html>

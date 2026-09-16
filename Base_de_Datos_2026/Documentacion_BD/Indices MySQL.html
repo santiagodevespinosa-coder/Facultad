@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índices en Bases de Datos MySQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            line-height: 1.55;
+            color: #1a2c3e;
+            padding: 2rem 1rem;
+        }
+
+        .doc {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem 2rem 3rem 2rem;
+        }
+
+        .letterhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #cbdde6;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .letterhead .institucion p {
+            margin-bottom: 0.1rem;
+            font-size: 0.95rem;
+            color: #33495a;
+        }
+
+        .letterhead .institucion p:first-child {
+            font-weight: 700;
+            color: #0e3b4b;
+            font-size: 1.05rem;
+        }
+
+        .letterhead .logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            color: #1f6e8c;
+            border: 2px solid #1f6e8c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            border-left: 5px solid #1f6e8c;
+            padding-left: 1.2rem;
+            margin: 0 0 0.5rem 0;
+            color: #0e3b4b;
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #cbdde6;
+            color: #1f5e78;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.8rem 0;
+            color: #2c6e8f;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 1rem 0 0.5rem 0;
+            color: #1f6e8c;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            margin: 0.8rem 0 1rem 1.8rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        pre {
+            background: #f4f9fe;
+            border-left: 4px solid #1f6e8c;
+            padding: 1rem 1.2rem;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            margin: 1.2rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f0f2f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #1f5e78;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #1c3e4f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.88rem;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        th {
+            background: #e4edf2;
+            color: #0f445b;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #cbdae2;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid #e2e8ed;
+            vertical-align: top;
+        }
+
+        .info-box {
+            background: #eef6fa;
+            border-left: 5px solid #2c8eb3;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            margin: 1.2rem 0;
+        }
+
+        .warning-box {
+            background: #fff7eb;
+            border-left: 5px solid #e6a017;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            margin: 1.2rem 0;
+        }
+
+        .example-box {
+            background: #fafdfe;
+            border: 1px solid #d4e2ea;
+            border-radius: 20px;
+            padding: 0.2rem 1.5rem 1rem 1.5rem;
+            margin: 1.8rem 0;
+        }
+
+        .example-box h4 {
+            margin-top: 1rem;
+        }
+
+        .diagram {
+            background: #fafdfe;
+            border: 1px solid #d4e2ea;
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .level {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .node {
+            background: #1f6e8c;
+            color: white;
+            border-radius: 16px;
+            padding: 0.5rem 0.9rem;
+            min-width: 84px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .leaf {
+            background: #2c8f5c;
+        }
+
+        .small-note {
+            font-size: 0.85rem;
+            color: #4b5e6d;
+            margin-top: 0.8rem;
+        }
+
+        hr {
+            margin: 2rem 0;
+            border: none;
+            height: 1px;
+            background: #cde1ea;
+        }
+
+        .badge {
+            background: #e4edf2;
+            color: #1f5e78;
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+        }
+
+        footer {
+            margin-top: 2.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5b7e93;
+            border-top: 1px solid #cde1ea;
+            padding-top: 1.8rem;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .doc { padding: 1rem; box-shadow: none; }
+            h2, h3 { break-after: avoid; }
+            pre, .example-box, table, .info-box, .warning-box, .diagram { break-inside: avoid; page-break-inside: avoid; }
+        }
+
+        @media (max-width: 700px) {
+            .doc { padding: 1.2rem; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+            pre { font-size: 0.75rem; }
+            .letterhead { flex-direction: column; gap: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="doc">
+
+    <div class="letterhead">
+        <div class="institucion">
+            <p>Instituto Argentino de la Empresa</p>
+            <p>Analista de Sistemas</p>
+            <p>Bases de Datos – 2º año</p>
+        </div>
+        <div class="logo">HILET</div>
+    </div>
+
+    <div class="badge">Bases de Datos II | MySQL</div>
+    <h1>Índices en Bases de Datos MySQL</h1>
+
+    <h2>Introducción</h2>
+    <p>En una base de datos, los <strong>índices</strong> son estructuras auxiliares que mejoran la velocidad de recuperación de datos en las consultas. La comparación clásica es con el índice de un libro: en vez de leer página por página, buscamos una entrada y vamos directo a la parte que nos interesa.</p>
+    <p>Cuando una tabla no tiene un índice útil para una consulta, MySQL puede verse obligado a recorrer muchas filas, o incluso toda la tabla (lo que se conoce como <em>full scan</em>). En tablas pequeñas esto pasa desapercibido, pero en tablas grandes el costo crece mucho.</p>
+
+    <h2>Concepto básico</h2>
+    <p>Un índice en MySQL es un objeto de base de datos que se crea sobre una o más columnas de una tabla. Su objetivo es permitir un acceso más rápido a los datos en las consultas que usan esas columnas.</p>
+    <p>Por ejemplo, si tenemos una tabla de clientes con miles o millones de registros y queremos buscar por apellido, sin índice MySQL debe revisar fila por fila. Con un índice sobre <code>apellido</code>, puede localizar el dato mucho más rápido, evitando leer todas las filas de la tabla.</p>
+
+    <h2>¿Por qué usar índices?</h2>
+    <h3>Ventajas principales</h3>
+    <ul>
+        <li><strong>Velocidad en consultas de búsqueda</strong>, especialmente con <code>WHERE</code>, <code>JOIN</code>, <code>ORDER BY</code> y <code>GROUP BY</code>.</li>
+        <li><strong>Eficiencia en búsquedas por rango</strong> cuando el tipo de índice lo permite (<code>BETWEEN</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>).</li>
+        <li><strong>Ordenamiento más eficiente</strong>, ya que ciertos índices mantienen los datos organizados de una forma útil para <code>ORDER BY</code>.</li>
+        <li><strong>Optimización de búsquedas</strong> sobre columnas consultadas con frecuencia.</li>
+        <li><strong>Unicidad garantizada</strong> cuando se usan índices <code>UNIQUE</code>.</li>
+    </ul>
+
+    <h3>Desventajas y costos</h3>
+    <ul>
+        <li>Ocupan <strong>espacio adicional</strong> en disco o memoria.</li>
+        <li><strong>Ralentizan</strong> las operaciones de <code>INSERT</code>, <code>UPDATE</code> y <code>DELETE</code>, porque cada cambio en los datos también debe reflejarse en el índice.</li>
+        <li>Un exceso de índices puede <strong>degradar el rendimiento general</strong>.</li>
+        <li>Un índice mal elegido puede existir y aun así no ser útil para ciertas consultas.</li>
+    </ul>
+    <div class="info-box"><strong>Regla de oro:</strong> crear índices solo sobre columnas que se usan frecuentemente en <code>WHERE</code>, <code>JOIN</code>, <code>ORDER BY</code> o búsquedas importantes. Indexar "todo" no es buena práctica.</div>
+
+    <h2>Tipos de índices según su estructura interna</h2>
+    <p>En MySQL, los tipos concretos dependen también del motor de almacenamiento. Para InnoDB (el motor por defecto), la gran mayoría de los índices se basan en B-Tree, más precisamente en B+Tree.</p>
+    <table>
+        <thead>
+            <tr><th>Tipo</th><th>Motor compatible</th><th>Ideal para</th><th>No sirve bien para</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>B-Tree / B+Tree</strong></td><td>InnoDB, MyISAM, MEMORY</td><td>Búsquedas exactas, por rango, <code>ORDER BY</code> y la mayoría de los casos generales</td><td>Búsquedas de texto completo avanzadas</td></tr>
+            <tr><td><strong>Full-Text</strong></td><td>InnoDB, MyISAM</td><td>Palabras clave en textos largos</td><td>Igualdad estricta o búsquedas numéricas simples</td></tr>
+            <tr><td><strong>Hash</strong></td><td>MEMORY</td><td>Búsquedas exactas con <code>=</code> o <code>IN</code></td><td>Rangos, <code>ORDER BY</code>, búsquedas secuenciales</td></tr>
+        </tbody>
+    </table>
+    <p>En la práctica, la enorme mayoría de los índices que se crean en un curso inicial de MySQL son de tipo <strong>B-Tree</strong>.</p>
+
+    <h2>Índices B-Tree</h2>
+    <p>Los índices B-Tree son árboles balanceados: organizan los valores de forma jerárquica para poder buscar rápido sin recorrer toda la tabla.</p>
+    <h3>¿Cómo funcionan?</h3>
+    <p>El árbol está organizado en niveles: una <strong>raíz</strong>, posibles <strong>nodos intermedios</strong> y <strong>nodos hoja</strong>. En cada nivel, el índice descarta grandes porciones de datos hasta llegar a la ubicación probable del valor buscado — una idea similar a la búsqueda binaria, adaptada a estructuras de almacenamiento en disco.</p>
+    <h3>Características</h3>
+    <ul>
+        <li>Soportan búsquedas exactas (<code>=</code>) y por rango (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>BETWEEN</code>).</li>
+        <li>Son útiles para <code>ORDER BY</code>.</li>
+        <li>Sirven de base para la gran mayoría de los índices en MySQL.</li>
+    </ul>
+    <h3>Limitaciones</h3>
+    <ul>
+        <li>Su mantenimiento tiene costo cuando se insertan, actualizan o eliminan registros (el árbol debe reequilibrarse).</li>
+        <li>No reemplazan a Full-Text cuando se buscan palabras dentro de textos largos.</li>
+    </ul>
+
+    <div class="diagram">
+        <h4>Representación simplificada de un índice B-Tree</h4>
+        <div class="tree">
+            <div class="level"><div class="node">Raíz: [15, 25]</div></div>
+            <div class="level">
+                <div class="node">Nodo: [5, 10]</div>
+                <div class="node">Nodo: [20]</div>
+                <div class="node">Nodo: [30, 35, 40]</div>
+            </div>
+            <div class="level">
+                <div class="node leaf">ID=5<br>Ana, 24</div>
+                <div class="node leaf">ID=10<br>Juan, 30</div>
+                <div class="node leaf">ID=15<br>Sofía, 28</div>
+                <div class="node leaf">ID=20<br>Pedro, 35</div>
+                <div class="node leaf">ID=25<br>Laura, 22</div>
+                <div class="node leaf">ID=30<br>Diego, 27</div>
+                <div class="node leaf">ID=35<br>Marta, 31</div>
+                <div class="node leaf">ID=40<br>Sofia, 50</div>
+            </div>
+        </div>
+        <p class="small-note"><strong>Leyenda:</strong> en un índice agrupado, las hojas contienen los datos completos de la fila (todas las columnas). En un índice no agrupado, las hojas contienen el valor indexado más la clave primaria, que actúa como referencia hacia el índice agrupado.</p>
+    </div>
+
+    <h2>Índice Clustered (Agrupado) vs Non-Clustered (No Agrupado)</h2>
+
+    <div class="warning-box">
+        <strong>Aclaración importante:</strong> en MySQL <strong>no existe</strong> una instrucción como <code>CREATE CLUSTERED INDEX ...</code> (esa sintaxis es de SQL Server). En MySQL con InnoDB, el índice agrupado no se crea manualmente: se determina automáticamente a partir de la <strong>PRIMARY KEY</strong> de la tabla. Si ves ese comando en algún apunte, es un error de mezcla entre motores distintos.
+    </div>
+
+    <h3>Índice Clustered (Agrupado)</h3>
+    <ul>
+        <li>Determina el <strong>orden físico</strong> de almacenamiento de las filas.</li>
+        <li>Solo puede haber <strong>uno</strong> por tabla, ya que solo puede existir un orden físico.</li>
+        <li>En InnoDB, la <strong>clave primaria</strong> es automáticamente el índice agrupado.</li>
+        <li>Los <strong>nodos hoja</strong> contienen los datos completos de la fila.</li>
+    </ul>
+    <p>Los datos de las filas y el índice agrupado están estrechamente ligados: las hojas del árbol son, en la práctica, las filas completas. Por eso se dice que "la tabla está organizada según el índice agrupado".</p>
+
+    <h3>Índice Non-Clustered (No Agrupado)</h3>
+    <ul>
+        <li>No cambia el orden físico de la tabla.</li>
+        <li>Puede haber <strong>varios</strong> por tabla.</li>
+        <li>Sus hojas guardan el valor indexado más una referencia a la fila real (en InnoDB, esa referencia es la clave primaria).</li>
+    </ul>
+    <p>Se guarda en una estructura separada de la organización principal de la tabla. Por eso, cuando una consulta necesita columnas que no están en ese índice, MySQL suele hacer una segunda navegación hacia el índice agrupado (esto se conoce como <em>lookup</em>).</p>
+
+    <div class="example-box">
+        <h4>Creación de índices en MySQL (sintaxis correcta)</h4>
+        <pre><code>-- Índice no agrupado simple
+CREATE INDEX IX_Clientes_Email ON Clientes (Email);
+
+-- Índice compuesto (no agrupado)
+CREATE INDEX IX_Clientes_Apellido_Nombre ON Clientes (Apellido, Nombre);
+
+-- El índice agrupado NO se crea manualmente: se define solo declarando la PK
+CREATE TABLE Clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,   -- esta PK ES el índice agrupado
+    apellido VARCHAR(50),
+    nombre VARCHAR(50),
+    email VARCHAR(100)
+);</code></pre>
+    </div>
+
+    <h3>¿Qué pasa si no hay clave primaria?</h3>
+    <p>InnoDB necesita igualmente una forma de identificar de manera única cada fila para organizar el índice agrupado:</p>
+    <ul>
+        <li>Si la tabla tiene <strong>PRIMARY KEY</strong>, esa PK es el índice agrupado.</li>
+        <li>Si no hay PK, InnoDB puede usar una columna <strong>UNIQUE NOT NULL</strong> como identificador agrupado.</li>
+        <li>Si tampoco existe una opción adecuada, InnoDB crea una clave oculta interna (comparable a un <code>rowid</code>) para poder identificar las filas.</li>
+    </ul>
+    <div class="warning-box"><strong>Conclusión práctica:</strong> siempre conviene definir una PRIMARY KEY explícita. Así evitamos dejarle al motor una decisión implícita y logramos una organización más clara y predecible.</div>
+
+    <h3>¿Qué diferencia hay en la lectura?</h3>
+    <p>Cuando una consulta usa el índice agrupado y necesita columnas de la propia fila, en general llega directo al dato completo en una sola navegación del árbol. Con un índice no agrupado, primero encuentra la clave indexada y luego necesita una segunda búsqueda hacia el índice agrupado para obtener el resto de la fila (doble salto).</p>
+
+    <h3>Resumen comparativo</h3>
+    <table>
+        <thead><tr><th></th><th>Índice Agrupado</th><th>Índice No Agrupado</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Nodos intermedios</strong></td><td>Claves que dividen rangos y punteros a nodos hijos</td><td>Valores de la columna indexada y punteros a nodos hijos</td></tr>
+            <tr><td><strong>Nodos hoja</strong></td><td>Datos completos de la fila</td><td>Clave del índice + clave primaria (referencia)</td></tr>
+            <tr><td><strong>Cantidad por tabla</strong></td><td>Uno solo</td><td>Varios</td></tr>
+            <tr><td><strong>Puntero final</strong></td><td>Ubicación física del registro</td><td>Apunta al índice agrupado</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Índices compuestos o multicolumna</h2>
+    <p>Un índice compuesto se define sobre dos o más columnas.</p>
+    <pre><code>CREATE INDEX idx_apellido_nombre ON clientes (apellido, nombre);</code></pre>
+    <p>El orden de las columnas es <strong>crítico</strong>. Si el índice está definido como <code>(apellido, nombre)</code>, sirve para búsquedas por <code>apellido</code>, para búsquedas por <code>apellido</code> y <code>nombre</code> juntos, y para casos donde se filtra por <code>apellido</code> y se ordena por <code>nombre</code>. Pero <strong>no</strong> sirve igual de bien para búsquedas solo por <code>nombre</code>, porque el árbol está ordenado primero por <code>apellido</code>.</p>
+
+    <h3>¿Cómo impacta una PK compuesta en el índice agrupado?</h3>
+    <p>Si se define una clave primaria compuesta (por ejemplo <code>(sucursal_id, cliente_id)</code>), esa combinación pasa a ser la clave que identifica físicamente las filas en el índice agrupado. Además, los índices secundarios deben guardar esa PK compuesta en sus hojas, lo que implica:</p>
+    <ul>
+        <li>los índices secundarios pueden ocupar más espacio;</li>
+        <li>el orden físico de la tabla queda condicionado por esa PK compuesta;</li>
+        <li>conviene que la PK compuesta esté bien pensada y no sea innecesariamente ancha.</li>
+    </ul>
+
+    <h2>Índices únicos (<code>UNIQUE</code>)</h2>
+    <p>Un índice único garantiza que no existan dos filas con el mismo valor en la columna o conjunto de columnas indexadas.</p>
+    <pre><code>CREATE UNIQUE INDEX idx_email_unico ON clientes (email);</code></pre>
+    <p>También puede definirse como restricción <code>UNIQUE</code> dentro de la tabla. Además de acelerar búsquedas, cumple una función de <strong>integridad</strong>: impide duplicados no permitidos.</p>
+
+    <h2>¿Cómo utilizan los índices las consultas?</h2>
+    <div class="example-box">
+        <h4>Consulta sin índice</h4>
+        <pre><code>SELECT * FROM Clientes WHERE Apellido = 'González';</code></pre>
+        <p>Si no existe un índice útil sobre <code>Apellido</code>, MySQL debe revisar todas las filas de la tabla para encontrar coincidencias.</p>
+        <h4>Consulta con índice</h4>
+        <pre><code>CREATE INDEX idx_apellido ON Clientes (Apellido);
+
+SELECT * FROM Clientes WHERE Apellido = 'González';</code></pre>
+        <p>Ahora MySQL puede usar el índice para localizar mucho más rápido las filas donde <code>Apellido = 'González'</code>.</p>
+    </div>
+
+    <h2>EXPLAIN: cómo verificar si una consulta usa índices</h2>
+    <p><code>EXPLAIN</code> es una herramienta fundamental para analizar cómo MySQL planea ejecutar una consulta. Antepuesto a un <code>SELECT</code>, muestra si va a usar un índice, qué tabla lee, qué tipo de acceso utilizará y cuántas filas estima revisar.</p>
+    <pre><code>EXPLAIN
+SELECT * FROM clientes WHERE apellido = 'González';</code></pre>
+    <h3>Campos más importantes a mirar</h3>
+    <ul>
+        <li><strong>table:</strong> qué tabla está leyendo MySQL en ese paso.</li>
+        <li><strong>type:</strong> tipo de acceso (cuanto más selectivo y con menos filas a revisar, mejor). <code>ALL</code> significa recorrido completo de la tabla.</li>
+        <li><strong>possible_keys:</strong> qué índices podrían servir para esa consulta.</li>
+        <li><strong>key:</strong> el índice que MySQL eligió realmente.</li>
+        <li><strong>rows:</strong> estimación de cuántas filas deberá revisar.</li>
+        <li><strong>Extra:</strong> información adicional, por ejemplo <code>Using where</code>.</li>
+    </ul>
+
+    <div class="example-box">
+        <h4>Ejemplo: antes y después de crear un índice</h4>
+        <p>Tabla de prueba con 12 registros, buscando <code>apellido = 'González'</code>:</p>
+        <table>
+            <thead><tr><th>Campo</th><th>Sin índice</th><th>Con índice sobre <code>apellido</code></th></tr></thead>
+            <tbody>
+                <tr><td><code>type</code></td><td>ALL (recorrido completo)</td><td>ref (acceso por índice)</td></tr>
+                <tr><td><code>possible_keys</code></td><td>NULL</td><td>idx_clientes_apellido</td></tr>
+                <tr><td><code>key</code></td><td>NULL</td><td>idx_clientes_apellido</td></tr>
+                <tr><td><code>rows</code></td><td>12</td><td>4</td></tr>
+                <tr><td><code>ref</code></td><td>NULL</td><td>const</td></tr>
+                <tr><td><code>Extra</code></td><td>Using where</td><td>NULL</td></tr>
+            </tbody>
+        </table>
+        <p class="small-note">La estimación de filas a revisar bajó de 12 a 4, y se pasó de un recorrido completo a un acceso directo por índice.</p>
+    </div>
+
+    <div class="info-box"><strong>Importante:</strong> <code>EXPLAIN</code> no devuelve los datos finales de la consulta, sino el <strong>plan de ejecución estimado</strong>: cómo piensa trabajar MySQL para obtener esos datos.</div>
+
+    <div class="example-box">
+        <h4>Índices compuestos y ORDER BY</h4>
+        <pre><code>-- El índice sobre apellido ayuda al filtro, pero no resuelve
+-- por sí solo el ORDER BY nombre
+EXPLAIN
+SELECT id, apellido, nombre
+FROM clientes
+WHERE apellido = 'González'
+ORDER BY nombre;
+
+-- Un índice compuesto puede resolver ambas cosas a la vez
+CREATE INDEX idx_clientes_apellido_nombre ON clientes (apellido, nombre);</code></pre>
+        <p>Esto muestra por qué el orden de las columnas dentro de un índice compuesto importa tanto: si primero se filtra por <code>apellido</code> y después se ordena por <code>nombre</code>, un índice <code>(apellido, nombre)</code> resulta muy conveniente.</p>
+    </div>
+
+    <h2>Índices Full-Text (texto completo)</h2>
+    <p>Están diseñados para búsquedas en grandes bloques de texto. No son simplemente una versión rápida de <code>LIKE '%palabra%'</code>: funcionan de otra manera.</p>
+    <h3>¿Cómo funcionan?</h3>
+    <p>En lugar de buscar coincidencias carácter por carácter, el motor <strong>tokeniza</strong> el contenido: lo divide en palabras o unidades llamadas <strong>tokens</strong>, descartando palabras irrelevantes (<em>stop words</em> como "y", "de", "la", "el"), y las almacena en una estructura que permite búsquedas por relevancia.</p>
+    <div class="info-box"><strong>Proceso de tokenización:</strong> 1) extracción de palabras del texto; 2) eliminación de stop words; 3) indexación de cada token junto con la información de en qué filas aparece.</div>
+
+    <div class="example-box">
+        <h4>Ejemplo</h4>
+        <pre><code>CREATE TABLE articulos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200),
+    contenido TEXT,
+    FULLTEXT (titulo, contenido)
+);
+
+-- También puede agregarse después con una instrucción separada
+CREATE FULLTEXT INDEX idx_contenido ON articulos (contenido);
+
+SELECT *
+FROM articulos
+WHERE MATCH(titulo, contenido) AGAINST ('base de datos');</code></pre>
+        <p>Ejemplo conceptual: el texto "Los avances en la inteligencia artificial son sorprendentes" se tokeniza en <code>avances</code>, <code>inteligencia</code>, <code>artificial</code>, <code>sorprendentes</code>, descartando las palabras comunes.</p>
+    </div>
+
+    <h3>Ventajas</h3>
+    <ul>
+        <li>Búsquedas rápidas y precisas en textos largos, con opción de ordenar por relevancia.</li>
+        <li>Muy superiores a un <code>LIKE '%texto%'</code> cuando el objetivo es buscar contenido dentro de textos extensos.</li>
+    </ul>
+    <h3>Limitaciones</h3>
+    <ul>
+        <li>Solo funcionan en los motores y versiones que lo soportan (InnoDB, MyISAM).</li>
+        <li>No son ideales para igualdad estricta de valores pequeños.</li>
+        <li>Las stop words y la configuración pueden afectar los resultados.</li>
+    </ul>
+
+    <h2>Índices Hash</h2>
+    <h3>¿Qué son y cómo funcionan?</h3>
+    <p>Un índice Hash usa una función hash para convertir el valor de una columna en un identificador único ("clave hash") y localizar el dato asociado de forma directa, sin recorrer estructuras jerárquicas como un B-Tree. No organiza los datos por orden, sino por el resultado del hash.</p>
+    <h3>Dónde se usan</h3>
+    <p>Se asocian principalmente al motor <code>MEMORY</code> (que almacena tablas en RAM), ya que es el que los soporta directamente en MySQL.</p>
+    <div class="example-box">
+        <h4>Ejemplo</h4>
+        <pre><code>CREATE TABLE productos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255),
+    precio DECIMAL(10, 2),
+    tipo_memoria VARCHAR(50)
+) ENGINE=MEMORY;
+
+CREATE INDEX idx_tipo_hash ON productos (tipo_memoria) USING HASH;
+
+SELECT * FROM productos WHERE tipo_memoria = 'SSD';</code></pre>
+    </div>
+    <h3>Ventajas</h3>
+    <ul>
+        <li><strong>Velocidad extrema</strong> para búsquedas de igualdad (<code>=</code> o <code>IN</code>).</li>
+        <li><strong>Menor uso de recursos</strong>, ya que no almacenan estructuras complejas, solo claves hash vinculadas a las filas.</li>
+    </ul>
+    <h3>Limitaciones</h3>
+    <ul>
+        <li>Solo soportados por el motor <code>MEMORY</code> (no por InnoDB ni MyISAM).</li>
+        <li><strong>Sin búsquedas por rango:</strong> no sirven para <code>BETWEEN</code>, <code>&lt;</code>, <code>&gt;</code> ni <code>ORDER BY</code>, porque el hash no tiene un orden lógico.</li>
+        <li><strong>Colisiones de hash:</strong> dos valores distintos pueden generar la misma clave hash. MySQL lo resuelve internamente, pero muchas colisiones afectan el rendimiento.</li>
+    </ul>
+    <h3>¿Cuándo usarlos?</h3>
+    <p>Cuando se trabaja con tablas <code>MEMORY</code>, las consultas son principalmente de igualdad, y no se necesita soporte para rangos ni ordenamiento. Para cualquier otra situación, los índices B-Tree suelen ser más adecuados.</p>
+
+    <h2>Comparación de motores de almacenamiento</h2>
+    <table>
+        <thead><tr><th>Motor</th><th>Características</th><th>Ventajas</th><th>Desventajas</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><strong>InnoDB</strong></td>
+                <td>Soporte transaccional ACID. Persistencia en disco. Soporta claves foráneas (FK). Bloqueo a nivel de fila.</td>
+                <td>Alta confiabilidad y recuperación ante fallos. Relaciones entre tablas mediante FK. Ideal para datos críticos y complejos.</td>
+                <td>Mayor uso de recursos (CPU y memoria). Más lento para lectura en tablas grandes sin índices.</td>
+            </tr>
+            <tr>
+                <td><strong>MyISAM</strong></td>
+                <td>No soporta transacciones. Almacena datos en disco. Bloqueo a nivel de tabla. Índices basados en B-Tree.</td>
+                <td>Más rápido para consultas de solo lectura. Menor uso de memoria. Adecuado para almacenamiento simple y búsquedas rápidas.</td>
+                <td>No soporta FK ni transacciones. Menos confiable: riesgo de pérdida de datos ante fallos del sistema.</td>
+            </tr>
+            <tr>
+                <td><strong>MEMORY</strong></td>
+                <td>Datos almacenados en RAM. No persiste los datos (volátil). Índices basados en Hash o B-Tree.</td>
+                <td>Altísima velocidad para consultas. Ideal para datos temporales. Bajo uso de recursos en operaciones rápidas.</td>
+                <td>Los datos se pierden al reiniciar el servidor. No soporta grandes volúmenes ni relaciones complejas.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Mantenimiento de índices</h2>
+    <p>Los índices requieren mantenimiento: con el tiempo, las inserciones, actualizaciones y eliminaciones pueden afectar su organización y el rendimiento general.</p>
+    <pre><code>-- Reorganizar/optimizar la estructura de la tabla y sus índices
+OPTIMIZE TABLE Clientes;</code></pre>
+    <h3>Modificar un índice</h3>
+    <p>MySQL no permite modificar directamente un índice existente. Lo habitual es eliminarlo y crear uno nuevo:</p>
+    <pre><code>DROP INDEX nombre_del_indice ON nombre_de_la_tabla;
+
+CREATE INDEX nuevo_nombre_del_indice
+ON nombre_de_la_tabla (nueva_columna1, nueva_columna2);
+
+-- Ejemplo concreto
+DROP INDEX IX_Clientes_Apellido ON Clientes;
+CREATE INDEX IX_Clientes_Nombre_Apellido ON Clientes (Nombre, Apellido);</code></pre>
+    <h3>Eliminar un índice</h3>
+    <pre><code>DROP INDEX nombre_del_indice ON nombre_de_la_tabla;
+
+-- Ejemplo
+DROP INDEX IX_Clientes_Email ON Clientes;</code></pre>
+
+    <h2>Buenas prácticas</h2>
+    <ul>
+        <li>No crear índices "por si acaso": analizar primero las consultas reales que se ejecutan.</li>
+        <li>Evaluar si la columna tiene suficiente selectividad (valores variados) antes de indexarla.</li>
+        <li>Usar índices compuestos en columnas que se consultan juntas con frecuencia.</li>
+        <li>Recordar que demasiados índices perjudican inserciones, actualizaciones y eliminaciones.</li>
+        <li>Aplicar <code>EXPLAIN</code> antes y después de crear o modificar un índice importante.</li>
+        <li>Revisar el indexado de columnas involucradas en claves foráneas y <code>JOIN</code> frecuentes: una FK sin buen soporte de índice puede volver lentos los <code>JOIN</code> y las validaciones de integridad.</li>
+        <li>Realizar mantenimiento regular en tablas que reciben muchas inserciones y actualizaciones.</li>
+    </ul>
+
+    <h2>Preguntas guía (con respuesta)</h2>
+    <div class="example-box">
+        <p><strong>1. ¿Por qué los índices B-Tree sirven de base para muchos otros índices?</strong><br>
+        Porque ofrecen una estructura versátil: soportan igualdad, rangos y ordenamiento. Por eso la mayoría de los motores los usan como base para gran parte de sus índices generales (a diferencia de Hash, que solo resuelve igualdad).</p>
+
+        <p><strong>2. ¿Qué sucede en la tabla al declarar una PK? ¿De quién depende?</strong><br>
+        En InnoDB, esa PK pasa automáticamente a ser el índice agrupado de la tabla. Depende exclusivamente del motor de almacenamiento (InnoDB gestiona esto así; MyISAM, por ejemplo, no tiene índice agrupado).</p>
+
+        <p><strong>3. ¿Qué sucede si no se declara una PK?</strong><br>
+        InnoDB usa una columna <code>UNIQUE NOT NULL</code> si existe, y si no hay ninguna disponible, crea una clave oculta interna (comparable a un <code>rowid</code>) para poder organizar la tabla.</p>
+
+        <p><strong>4. ¿Qué diferencia hay para el motor al leer con un índice clustered o uno no clustered?</strong><br>
+        Con el clustered, la lectura llega directo a la fila completa en una sola navegación. Con el no clustered, primero se navega el índice secundario y luego hay que ir al índice agrupado a buscar el resto de los datos (acceso a disco adicional).</p>
+
+        <p><strong>5. ¿Por qué un índice no agrupado apunta al agrupado?</strong><br>
+        Porque el agrupado ya contiene la fila completa; el índice secundario solo necesita guardar la clave indexada y la referencia (la PK), evitando duplicar todos los datos de la fila. Esto convierte al índice agrupado en una especie de "intermediario" obligado.</p>
+
+        <p><strong>6. ¿Qué impacto tendría que el motor use un <code>rowid</code> oculto como índice agrupado?</strong><br>
+        Se pierde claridad de diseño y se deja una decisión importante en manos del motor, sin control explícito del desarrollador. Por eso conviene siempre definir una PK explícita y estable.</p>
+
+        <p><strong>7. ¿Cómo afectan los índices a las claves foráneas (FK)?</strong><br>
+        Un buen indexado sobre las columnas relacionadas ayuda mucho al rendimiento de los <code>JOIN</code> y de los controles de integridad referencial que MySQL hace al insertar, actualizar o borrar filas relacionadas.</p>
+
+        <p><strong>8. ¿Cómo impacta en el índice agrupado el definir una PK compuesta?</strong><br>
+        Afecta el orden físico de la tabla (que queda ordenada según esa combinación de columnas) y también el tamaño de los índices secundarios, porque estos deben almacenar la PK compuesta completa como referencia en cada una de sus hojas.</p>
+    </div>
+
+    <h2>Cierre</h2>
+    <p>La idea central: los índices aceleran las lecturas, pero tienen un costo de mantenimiento. Por eso deben diseñarse en función de las consultas reales que hace el sistema, y no de forma automática sobre todas las columnas. Entender la diferencia entre buscar datos, ordenar datos y mantener datos actualizados ayuda a pensar el modelo con criterio, más allá de la sintaxis.</p>
+
+    <hr>
+    <footer>
+        Documento sobre Índices en Bases de Datos MySQL — Bases de Datos, 2º año.
+    </footer>
+</div>
+</body>
+</html>

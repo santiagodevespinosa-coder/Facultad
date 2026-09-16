@@ -1,0 +1,9 @@
+Apuntes Base de Datos 2026
+
+Diferencia entre SELECT y SET.
+
+SELECT: si tenemos que buscar un datos en alguna tabla tenemos que usar el SELECT ... INTO
+
+SET: lo usamos directamente, no necesitamos buscar ningun dato, como en algun calculo.
+
+testgame@1
