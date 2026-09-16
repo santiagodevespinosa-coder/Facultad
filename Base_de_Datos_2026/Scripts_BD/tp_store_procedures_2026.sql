@@ -86,7 +86,7 @@ DELIMITER ;
 
 DROP PROCEDURE actualizar_nombre_cliente;
 
-CALL actualizar_nombre_cliente(1, 'Alicia');
+CALL actualizar_nombre_cliente(5, 'Ezequiel');
 
 SELECT * FROM clientes;
 
@@ -171,7 +171,7 @@ CREATE PROCEDURE incrementar_saldo_cliente
 )
 BEGIN
 	UPDATE clientes
-    SET saldo = saldo + p_id_cliente
+    SET saldo = saldo + p_cantidad
     WHERE id_cliente = p_id_cliente;
 END //
 
@@ -277,3 +277,66 @@ Acciones a realizar:
 Observación: utilizar LAST_INSERT_ID() para obtener el ID de la compra recién creada y mostrarlo como resultado.
 */
 
+DELIMITER //
+CREATE PROCEDURE registrar_compra
+(
+	IN p_id_cliente INT,
+    IN p_monto DECIMAL (10,2)
+)
+BEGIN
+	
+    DECLARE v_nuevo_id INT;
+	-- Insercion nuevo registro en la tabla de compras
+	INSERT INTO compras (id_compra, fecha, monto)
+    VALUES(p_id_cliente, CURDATE(), p_monto);
+    
+    -- Declaracion para el nuevo ID
+    SET v_nuevo_id = LAST_INSERT_ID();
+    
+    -- Actualizacion de saldo del cliente
+    
+    UPDATE clientes
+    SET saldo = saldo - p_monto
+    WHERE id_cliente = p_id_cliente;
+    
+END //
+DELIMITER ;
+
+CALL registrar_compra(3, 300);
+
+SELECT * FROM clientes;
+
+/*9 Listar clientes con filtros avanzados
+
+Crear un procedimiento llamado listar_clientes_avanzado que permita listar clientes según varios filtros opcionales.
+
+Parámetros de entrada (todos opcionales):
+
+    p_nombre — filtro por nombre (utilizar LIKE) — si es NULL, no filtrar
+    p_saldo_min — saldo mínimo — si es NULL, no filtrar
+    p_saldo_max — saldo máximo — si es NULL, no filtrar
+    p_fecha_desde — fecha mínima de última compra — si es NULL, no filtrar
+
+Consideraciones:
+
+    Para el filtro por nombre, utilizar LIKE CONCAT('%', p_nombre, '%')
+    Para el filtro por saldo, utilizar BETWEEN o condiciones con >= y <=
+    Para el filtro por fecha, considerar la fecha de la última compra de cada cliente
+
+Nota: este ejercicio combina varios conceptos. 
+Construir la consulta de manera que los filtros se apliquen solo cuando el parámetro no sea NULL.
+*/
+
+DELIMITER //
+CREATE PROCEDURE listar_clientes_avanzado
+(
+	IN p_nombre VARCHAR(150),
+    IN p_saldo_min DECIMAL (10,2),
+    IN p_saldo_max DECIMAL (10,2),
+    IN p_fecha_desde DECIMAL (10,2)
+)
+BEGIN
+	SELECT nombre
+    
+END //
+DELIMITER ;
