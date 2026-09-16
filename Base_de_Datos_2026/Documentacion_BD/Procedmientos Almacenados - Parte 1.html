@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teoría SP - Parte 1 | Fundamentos de Procedimientos Almacenados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f4f7fc;
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            padding: 0 30px 40px;
+        }
+
+        .institutional-header {
+            background: linear-gradient(145deg, #0b2b4a, #1a4b6d);
+            color: white;
+            padding: 28px 30px 20px;
+            margin: 0 -30px 30px;
+            border-bottom: 4px solid #f5b042;
+        }
+
+        .institutional-header .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+        }
+
+        .institutional-header .instituto {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .institutional-header .instituto strong {
+            font-weight: 600;
+            color: #f5b042;
+        }
+
+        .institutional-header .carrera {
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        .institutional-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-top: 14px;
+            letter-spacing: -0.5px;
+        }
+
+        .institutional-header h1 small {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.75;
+            display: block;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .institutional-header .badge {
+            display: inline-block;
+            background: #f5b042;
+            color: #0b2b4a;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 4px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 28px 0 24px;
+            border-bottom: 2px solid #e9eef3;
+            padding-bottom: 4px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #5a6f84;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 0.2px;
+        }
+
+        .tab-btn:hover {
+            background: #eef3f9;
+            color: #0b2b4a;
+        }
+
+        .tab-btn.active {
+            background: #0b2b4a;
+            color: white;
+            box-shadow: 0 4px 12px rgba(11, 43, 74, 0.25);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0b2b4a;
+            margin: 28px 0 14px;
+            letter-spacing: -0.3px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a4b6d;
+            margin: 24px 0 10px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: #1e293b;
+        }
+
+        ul, ol {
+            margin: 10px 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #0b2b4a;
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 2px solid #dce3ec;
+        }
+
+        td {
+            padding: 11px 16px;
+            border-bottom: 1px solid #e9eef3;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .code-block {
+            position: relative;
+            background: #0f1a2b;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 14px;
+            margin: 16px 0 22px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .code-block .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #b0c4de;
+            font-size: 0.8rem;
+            padding: 4px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .code-block .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+        }
+
+        .code-block .copy-btn.copied {
+            background: #2e7d5e;
+            color: white;
+        }
+
+        .sql-kw { color: #7dd3fc; font-weight: 600; }
+        .sql-fn { color: #86efac; }
+        .sql-str { color: #fbbf24; }
+        .sql-num { color: #f472b6; }
+        .sql-cmt { color: #94a3b8; font-style: italic; }
+        .sql-var { color: #c4b5fd; }
+        .sql-op { color: #fca5a5; }
+
+        .card-tip {
+            background: #ecfdf5;
+            border-left: 5px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+
+        .card-tip strong {
+            color: #065f46;
+        }
+
+        .card-warning {
+            background: #fffbeb;
+            border-left: 5px solid #f59e0b;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+
+        .card-warning strong {
+            color: #92400e;
+        }
+
+        .card-example {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 18px 0;
+        }
+
+        .card-example .title {
+            font-weight: 600;
+            color: #0b2b4a;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 0 16px 30px; }
+            .institutional-header { padding: 20px 18px 16px; margin: 0 -16px 24px; }
+            .institutional-header .top-row { flex-direction: column; align-items: flex-start; }
+            .institutional-header h1 { font-size: 1.6rem; }
+            .tabs-nav { gap: 4px; }
+            .tab-btn { padding: 8px 14px; font-size: 0.8rem; }
+            .code-block { font-size: 0.8rem; padding: 16px 14px; }
+            .code-block .copy-btn { font-size: 0.7rem; padding: 2px 12px; top: 8px; right: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .tab-btn { font-size: 0.7rem; padding: 6px 10px; }
+            .institutional-header h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="institutional-header">
+            <div class="top-row">
+                <span class="instituto"><strong>Instituto Argentino de la Empresa</strong></span>
+                <span class="carrera">Analista de Sistemas · 2do año · Bases de Datos</span>
+            </div>
+            <h1>
+                Procedimientos Almacenados en MySQL
+                <small>Fundamentos · Sintaxis · Parámetros · Estructuras de control</small>
+            </h1>
+            <span class="badge">Teoría — Parte 1</span>
+        </header>
+
+        <nav class="tabs-nav" id="tabsNav">
+            <button class="tab-btn active" data-tab="intro">Introducción</button>
+            <button class="tab-btn" data-tab="sintaxis">Sintaxis</button>
+            <button class="tab-btn" data-tab="parametros">Parámetros</button>
+            <button class="tab-btn" data-tab="variables">Variables</button>
+            <button class="tab-btn" data-tab="control">Estructuras</button>
+            <button class="tab-btn" data-tab="funciones">Funciones</button>
+            <button class="tab-btn" data-tab="subconsultas">Subconsultas</button>
+            <button class="tab-btn" data-tab="buenas">Buenas prácticas</button>
+        </nav>
+
+        <!-- INTRODUCCIÓN -->
+        <section id="intro" class="tab-content active">
+            <h2>Introducción a los Procedimientos Almacenados</h2>
+
+            <p>Un <span class="highlight">procedimiento almacenado</span> (Stored Procedure) es un conjunto de instrucciones SQL que se almacenan y compilan en el servidor de la base de datos. Puede ejecutarse tantas veces como sea necesario, lo que lo convierte en una herramienta fundamental para encapsular lógica y optimizar el trabajo con datos.</p>
+
+            <h3>Ventajas principales</h3>
+            <ul>
+                <li><strong>Reutilización:</strong> un mismo procedimiento puede invocarse desde múltiples aplicaciones o scripts.</li>
+                <li><strong>Rendimiento:</strong> el código se compila una sola vez; las ejecuciones posteriores son más rápidas.</li>
+                <li><strong>Seguridad:</strong> es posible otorgar permiso para ejecutar un SP sin dar acceso directo a las tablas.</li>
+                <li><strong>Mantenimiento:</strong> los cambios se aplican en un único lugar, simplificando las actualizaciones.</li>
+                <li><strong>Reducción de tráfico:</strong> se envía una sola llamada en lugar de múltiples consultas.</li>
+            </ul>
+
+            <div class="card-tip">
+                <strong>Recomendación inicial:</strong> comenzar con SPs que realicen una sola operación (INSERT, UPDATE o SELECT). Una vez dominados, combinar varias operaciones dentro del mismo procedimiento.
+            </div>
+        </section>
+
+        <!-- SINTAXIS -->
+        <section id="sintaxis" class="tab-content">
+            <h2>Sintaxis básica</h2>
+
+            <p>La estructura fundamental para crear un procedimiento almacenado en MySQL es:</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> nombre_procedimiento ( <span class="sql-kw">parámetros</span> )
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-cmt">-- Sentencias SQL aquí</span>
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+
+            <h3>Elementos clave</h3>
+            <ul>
+                <li><strong>DELIMITER:</strong> MySQL usa <code>;</code> como delimitador por defecto. Al cambiarlo temporalmente (ej. a <code>//</code>), se evita que MySQL interprete mal los puntos y coma dentro del SP.</li>
+                <li><strong>CREATE PROCEDURE:</strong> define el nombre del procedimiento.</li>
+                <li><strong>BEGIN … END:</strong> bloque que contiene el código del procedimiento.</li>
+                <li>Al final, se restaura el delimitador con <code>DELIMITER ;</code>.</li>
+            </ul>
+
+            <h3>Ejemplo básico</h3>
+            <p>Supóngase una tabla <span class="highlight">clientes</span> con <code>id_cliente</code>, <code>nombre</code> y <code>saldo</code>.</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> actualizar_saldo (
+                    <span class="sql-kw">IN</span> p_id_cliente <span class="sql-kw">INT</span>,
+                    <span class="sql-kw">IN</span> p_nuevo_saldo <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>)
+                )
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-kw">UPDATE</span> clientes
+                    <span class="sql-kw">SET</span> saldo <span class="sql-op">=</span> p_nuevo_saldo
+                    <span class="sql-kw">WHERE</span> id_cliente <span class="sql-op">=</span> p_id_cliente;
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+
+            <h3>Ejecutar un SP</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">CALL</span> actualizar_saldo(<span class="sql-num">1</span>, <span class="sql-num">500.00</span>);
+            </div>
+
+            <h3>Eliminar un SP</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DROP PROCEDURE</span> <span class="sql-kw">IF EXISTS</span> actualizar_saldo;
+            </div>
+
+            <div class="card-warning">
+                <strong>Nota:</strong> en MySQL Workbench o cualquier cliente, si se modifica un SP, es recomendable eliminarlo y volverlo a crear. Esta práctica ayuda a evitar errores de sintaxis y a internalizar la estructura completa.
+            </div>
+        </section>
+
+        <!-- PARÁMETROS -->
+        <section id="parametros" class="tab-content">
+            <h2>Parámetros en Procedimientos Almacenados</h2>
+
+            <p>MySQL permite tres tipos de parámetros para los SP:</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Ejemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>IN</strong></td>
+                            <td>Parámetro de entrada. El procedimiento recibe un valor.</td>
+                            <td><code>IN p_id INT</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>OUT</strong></td>
+                            <td>Parámetro de salida. El procedimiento devuelve un valor.</td>
+                            <td><code>OUT p_saldo DECIMAL(10,2)</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>INOUT</strong></td>
+                            <td>Entrada y salida. Se recibe un valor y se devuelve modificado.</td>
+                            <td><code>INOUT p_contador INT</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Ejemplo con OUT</h3>
+            <p>Procedimiento que devuelve el saldo de un cliente:</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> obtener_saldo (
+                    <span class="sql-kw">IN</span> p_id_cliente <span class="sql-kw">INT</span>,
+                    <span class="sql-kw">OUT</span> p_saldo <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>)
+                )
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-kw">SELECT</span> saldo <span class="sql-kw">INTO</span> p_saldo
+                    <span class="sql-kw">FROM</span> clientes
+                    <span class="sql-kw">WHERE</span> id_cliente <span class="sql-op">=</span> p_id_cliente;
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+
+            <h3>Ejecutar con OUT</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-cmt">-- Variable de usuario para recibir el valor</span>
+                <span class="sql-kw">SET</span> <span class="sql-var">@saldo_cliente</span> <span class="sql-op">=</span> <span class="sql-num">0</span>;
+
+                <span class="sql-cmt">-- Llamada al procedimiento</span>
+                <span class="sql-kw">CALL</span> obtener_saldo(<span class="sql-num">1</span>, <span class="sql-var">@saldo_cliente</span>);
+
+                <span class="sql-cmt">-- Ver el resultado</span>
+                <span class="sql-kw">SELECT</span> <span class="sql-var">@saldo_cliente</span> <span class="sql-kw">AS</span> <span class="sql-str">'Saldo actual'</span>;
+            </div>
+
+            <div class="card-tip">
+                <strong>Observación:</strong> las variables de usuario se identifican con el prefijo <code>@</code> y persisten durante toda la sesión. Son ideales para recibir valores de parámetros <code>OUT</code>.
+            </div>
+        </section>
+
+        <!-- VARIABLES -->
+        <section id="variables" class="tab-content">
+            <h2>Variables en Procedimientos Almacenados</h2>
+
+            <p>Dentro de un SP es posible declarar y usar distintos tipos de variables:</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Ámbito</th>
+                            <th>Ejemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>DECLARE</strong></td>
+                            <td>Local al bloque BEGIN…END</td>
+                            <td><code>DECLARE total INT;</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SET</strong> (asignación)</td>
+                            <td>Local o de usuario</td>
+                            <td><code>SET total = 100;</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>@variable</strong></td>
+                            <td>Global a la sesión</td>
+                            <td><code>SET @contador = 0;</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SELECT … INTO</strong></td>
+                            <td>Asigna resultado de consulta a variable local</td>
+                            <td><code>SELECT COUNT(*) INTO total FROM clientes;</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Ejemplo completo</h3>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> ejemplo_variables (
+                    <span class="sql-kw">IN</span> p_id <span class="sql-kw">INT</span>,
+                    <span class="sql-kw">OUT</span> p_resultado <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>)
+                )
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-cmt">-- Declaración de variables locales</span>
+                    <span class="sql-kw">DECLARE</span> v_nombre <span class="sql-kw">VARCHAR</span>(<span class="sql-num">100</span>);
+                    <span class="sql-kw">DECLARE</span> v_saldo <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>);
+                    <span class="sql-kw">DECLARE</span> v_total_clientes <span class="sql-kw">INT</span>;
+
+                    <span class="sql-cmt">-- Asignar valores desde la tabla</span>
+                    <span class="sql-kw">SELECT</span> nombre, saldo <span class="sql-kw">INTO</span> v_nombre, v_saldo
+                    <span class="sql-kw">FROM</span> clientes
+                    <span class="sql-kw">WHERE</span> id_cliente <span class="sql-op">=</span> p_id;
+
+                    <span class="sql-kw">SELECT</span> <span class="sql-fn">COUNT</span>(*) <span class="sql-kw">INTO</span> v_total_clientes
+                    <span class="sql-kw">FROM</span> clientes;
+
+                    <span class="sql-cmt">-- Asignación con SET</span>
+                    <span class="sql-kw">SET</span> p_resultado <span class="sql-op">=</span> v_saldo <span class="sql-op">+</span> <span class="sql-num">100</span>;
+
+                    <span class="sql-cmt">-- Variable de usuario (persiste fuera del SP)</span>
+                    <span class="sql-kw">SET</span> <span class="sql-var">@ultimo_cliente</span> <span class="sql-op">=</span> v_nombre;
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+
+            <div class="card-warning">
+                <strong>Nota:</strong> las variables declaradas con <code>DECLARE</code> solo existen dentro del SP. Las variables de usuario (<code>@variable</code>) pueden usarse incluso después de que el SP finalice.
+            </div>
+        </section>
+
+        <!-- ESTRUCTURAS DE CONTROL -->
+        <section id="control" class="tab-content">
+            <h2>Estructuras de control</h2>
+
+            <p>Los SP soportan lógica condicional e iterativa, lo que los convierte en verdaderos programas dentro de la base de datos.</p>
+
+            <h3>IF … THEN … ELSE</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">IF</span> condicion <span class="sql-kw">THEN</span>
+                    <span class="sql-cmt">-- código si es verdadero</span>
+                <span class="sql-kw">ELSEIF</span> otra_condicion <span class="sql-kw">THEN</span>
+                    <span class="sql-cmt">-- código para otra condición</span>
+                <span class="sql-kw">ELSE</span>
+                    <span class="sql-cmt">-- código si ninguna se cumple</span>
+                <span class="sql-kw">END</span> <span class="sql-kw">IF</span>;
+            </div>
+
+            <h3>CASE</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">CASE</span> valor
+                    <span class="sql-kw">WHEN</span> <span class="sql-num">1</span> <span class="sql-kw">THEN</span> <span class="sql-cmt">-- acción 1</span>
+                    <span class="sql-kw">WHEN</span> <span class="sql-num">2</span> <span class="sql-kw">THEN</span> <span class="sql-cmt">-- acción 2</span>
+                    <span class="sql-kw">ELSE</span> <span class="sql-cmt">-- acción por defecto</span>
+                <span class="sql-kw">END</span> <span class="sql-kw">CASE</span>;
+            </div>
+
+            <h3>WHILE (bucle)</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">WHILE</span> condicion <span class="sql-kw">DO</span>
+                    <span class="sql-cmt">-- código a repetir</span>
+                <span class="sql-kw">END</span> <span class="sql-kw">WHILE</span>;
+            </div>
+
+            <h3>LOOP con LEAVE (salida)</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                nombre_bucle: <span class="sql-kw">LOOP</span>
+                    <span class="sql-cmt">-- código</span>
+                    <span class="sql-kw">IF</span> condicion_salida <span class="sql-kw">THEN</span>
+                        <span class="sql-kw">LEAVE</span> nombre_bucle;
+                    <span class="sql-kw">END</span> <span class="sql-kw">IF</span>;
+                <span class="sql-kw">END</span> <span class="sql-kw">LOOP</span>;
+            </div>
+
+            <div class="card-example">
+                <div class="title">Ejemplo: clasificar clientes por saldo</div>
+                <div class="code-block">
+                    <button class="copy-btn">Copiar</button>
+                    <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                    <span class="sql-kw">CREATE PROCEDURE</span> clasificar_cliente (
+                        <span class="sql-kw">IN</span> p_id <span class="sql-kw">INT</span>,
+                        <span class="sql-kw">OUT</span> p_categoria <span class="sql-kw">VARCHAR</span>(<span class="sql-num">20</span>)
+                    )
+                    <span class="sql-kw">BEGIN</span>
+                        <span class="sql-kw">DECLARE</span> v_saldo <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>);
+
+                        <span class="sql-kw">SELECT</span> saldo <span class="sql-kw">INTO</span> v_saldo
+                        <span class="sql-kw">FROM</span> clientes
+                        <span class="sql-kw">WHERE</span> id_cliente <span class="sql-op">=</span> p_id;
+
+                        <span class="sql-kw">IF</span> v_saldo <span class="sql-op">>=</span> <span class="sql-num">1000</span> <span class="sql-kw">THEN</span>
+                            <span class="sql-kw">SET</span> p_categoria <span class="sql-op">=</span> <span class="sql-str">'Premium'</span>;
+                        <span class="sql-kw">ELSEIF</span> v_saldo <span class="sql-op">>=</span> <span class="sql-num">500</span> <span class="sql-kw">THEN</span>
+                            <span class="sql-kw">SET</span> p_categoria <span class="sql-op">=</span> <span class="sql-str">'Estándar'</span>;
+                        <span class="sql-kw">ELSE</span>
+                            <span class="sql-kw">SET</span> p_categoria <span class="sql-op">=</span> <span class="sql-str">'Básico'</span>;
+                        <span class="sql-kw">END</span> <span class="sql-kw">IF</span>;
+                    <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                    <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- FUNCIONES NATIVAS -->
+        <section id="funciones" class="tab-content">
+            <h2>Funciones nativas útiles</h2>
+
+            <p>MySQL ofrece muchas funciones que pueden usarse dentro de los SP para agilizar tareas comunes.</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Función</th>
+                            <th>Descripción</th>
+                            <th>Ejemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>LAST_INSERT_ID()</code></td>
+                            <td>ID de la última fila insertada con AUTO_INCREMENT</td>
+                            <td><code>SET @id = LAST_INSERT_ID();</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ROW_COUNT()</code></td>
+                            <td>Número de filas afectadas por la última operación</td>
+                            <td><code>IF ROW_COUNT() = 0 THEN ...</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CURDATE()</code></td>
+                            <td>Fecha actual (YYYY-MM-DD)</td>
+                            <td><code>INSERT INTO log (fecha) VALUES (CURDATE());</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>NOW()</code></td>
+                            <td>Fecha y hora actual</td>
+                            <td><code>SELECT NOW();</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>IFNULL(expr, valor)</code></td>
+                            <td>Devuelve <code>valor</code> si <code>expr</code> es NULL</td>
+                            <td><code>SELECT IFNULL(saldo, 0) FROM clientes;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CONCAT(str1, str2, ...)</code></td>
+                            <td>Concatena cadenas de texto</td>
+                            <td><code>SET @mensaje = CONCAT('Hola ', nombre);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DATE_ADD(fecha, INTERVAL)</code></td>
+                            <td>Suma un intervalo a una fecha</td>
+                            <td><code>DATE_ADD(CURDATE(), INTERVAL 7 DAY)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DATE_SUB(fecha, INTERVAL)</code></td>
+                            <td>Resta un intervalo a una fecha</td>
+                            <td><code>DATE_SUB(CURDATE(), INTERVAL 1 MONTH)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>IF(cond, verdadero, falso)</code></td>
+                            <td>Condicional en línea</td>
+                            <td><code>SELECT IF(saldo > 0, 'Activo', 'Inactivo');</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Ejemplo combinado</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> registrar_compra (
+                    <span class="sql-kw">IN</span> p_cliente_id <span class="sql-kw">INT</span>,
+                    <span class="sql-kw">IN</span> p_monto <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>)
+                )
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-kw">DECLARE</span> v_nuevo_id <span class="sql-kw">INT</span>;
+
+                    <span class="sql-cmt">-- Insertar compra</span>
+                    <span class="sql-kw">INSERT INTO</span> compras (id_cliente, fecha, monto)
+                    <span class="sql-kw">VALUES</span> (p_cliente_id, <span class="sql-fn">CURDATE</span>(), p_monto);
+
+                    <span class="sql-cmt">-- Obtener el ID generado</span>
+                    <span class="sql-kw">SET</span> v_nuevo_id <span class="sql-op">=</span> <span class="sql-fn">LAST_INSERT_ID</span>();
+
+                    <span class="sql-cmt">-- Actualizar saldo del cliente</span>
+                    <span class="sql-kw">UPDATE</span> clientes
+                    <span class="sql-kw">SET</span> saldo <span class="sql-op">=</span> saldo <span class="sql-op">-</span> p_monto
+                    <span class="sql-kw">WHERE</span> id_cliente <span class="sql-op">=</span> p_cliente_id;
+
+                    <span class="sql-cmt">-- Mostrar mensaje con CONCAT</span>
+                    <span class="sql-kw">SELECT</span> <span class="sql-fn">CONCAT</span>(<span class="sql-str">'Compra registrada. ID: '</span>, v_nuevo_id) <span class="sql-kw">AS</span> Mensaje;
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+        </section>
+
+        <!-- SUBCONSULTAS -->
+        <section id="subconsultas" class="tab-content">
+            <h2>Subconsultas dentro de SP</h2>
+
+            <p>Las subconsultas son consultas anidadas dentro de otra consulta. Son muy útiles dentro de los SP para tomar decisiones o filtrar datos de manera dinámica.</p>
+
+            <h3>Ejemplo: productos con precio mayor al promedio de su categoría</h3>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> productos_mas_caros_por_categoria()
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-kw">SELECT</span> p.nombre, p.precio, p.categoria
+                    <span class="sql-kw">FROM</span> productos p
+                    <span class="sql-kw">WHERE</span> p.precio <span class="sql-op">></span> (
+                        <span class="sql-kw">SELECT</span> <span class="sql-fn">AVG</span>(precio)
+                        <span class="sql-kw">FROM</span> productos
+                        <span class="sql-kw">WHERE</span> categoria <span class="sql-op">=</span> p.categoria
+                    );
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+
+            <h3>Ejemplo con EXISTS</h3>
+            <p>Clientes que han comprado más de 3 productos de una categoría específica:</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">CREATE PROCEDURE</span> clientes_con_compras_categoria (
+                    <span class="sql-kw">IN</span> p_categoria <span class="sql-kw">VARCHAR</span>(<span class="sql-num">50</span>)
+                )
+                <span class="sql-kw">BEGIN</span>
+                    <span class="sql-kw">SELECT</span> c.nombre, c.apellido
+                    <span class="sql-kw">FROM</span> clientes c
+                    <span class="sql-kw">WHERE EXISTS</span> (
+                        <span class="sql-kw">SELECT</span> <span class="sql-num">1</span>
+                        <span class="sql-kw">FROM</span> pedidos p
+                        <span class="sql-kw">INNER JOIN</span> detalles_pedido dp <span class="sql-kw">ON</span> p.id <span class="sql-op">=</span> dp.pedido_id
+                        <span class="sql-kw">INNER JOIN</span> productos pr <span class="sql-kw">ON</span> dp.producto_id <span class="sql-op">=</span> pr.id
+                        <span class="sql-kw">WHERE</span> p.cliente_id <span class="sql-op">=</span> c.id
+                        <span class="sql-kw">AND</span> pr.categoria <span class="sql-op">=</span> p_categoria
+                        <span class="sql-kw">GROUP BY</span> p.cliente_id
+                        <span class="sql-kw">HAVING</span> <span class="sql-fn">SUM</span>(dp.cantidad) <span class="sql-op">></span> <span class="sql-num">3</span>
+                    );
+                <span class="sql-kw">END</span> <span class="sql-str">//</span>
+
+                <span class="sql-kw">DELIMITER</span> <span class="sql-str">;</span>
+            </div>
+
+            <div class="card-tip">
+                <strong>Observación:</strong> <code>EXISTS</code> es una función booleana que devuelve <code>TRUE</code> si la subconsulta devuelve al menos una fila. Resulta eficiente para validar condiciones.
+            </div>
+        </section>
+
+        <!-- BUENAS PRÁCTICAS -->
+        <section id="buenas" class="tab-content">
+            <h2>Buenas prácticas</h2>
+
+            <ul>
+                <li><strong>Nombrar los parámetros con prefijo:</strong> usar <code>p_</code> para parámetros (ej. <code>p_id_cliente</code>) y <code>v_</code> para variables locales. Esto evita confusiones con nombres de columnas.</li>
+                <li><strong>Probar cada SP por separado:</strong> ejecutar el SP con diferentes valores para verificar su correcto funcionamiento.</li>
+                <li><strong>Agregar comentarios:</strong> explicar qué hace cada sección del código facilita el mantenimiento.</li>
+                <li><strong>Eliminar y volver a crear:</strong> durante el aprendizaje, es preferible borrar el SP y reescribirlo desde cero en lugar de modificarlo con <code>ALTER</code>. Esto refuerza el conocimiento de la sintaxis.</li>
+                <li><strong>Empezar por lo simple:</strong> primero desarrollar SP que realicen una sola operación (INSERT, UPDATE, SELECT). Luego combinar operaciones.</li>
+                <li><strong>Utilizar <code>ROW_COUNT()</code></strong> para validar si una operación afectó filas (ej. al actualizar o eliminar).</li>
+                <li><strong>Aprovechar <code>CURDATE()</code> y <code>NOW()</code></strong> para registrar fechas automáticamente.</li>
+            </ul>
+
+            <div class="card-example">
+                <div class="title">Resumen del flujo de trabajo</div>
+                <ol style="margin-left: 20px;">
+                    <li><strong>Diseñar</strong> qué debe hacer el SP (entrada, proceso, salida).</li>
+                    <li><strong>Escribir</strong> el SP con <code>DELIMITER</code>, <code>CREATE PROCEDURE</code> y <code>BEGIN … END</code>.</li>
+                    <li><strong>Probar</strong> con <code>CALL</code> usando valores de prueba.</li>
+                    <li><strong>Verificar</strong> los resultados (consultar tablas, variables de salida).</li>
+                    <li><strong>Corregir</strong> errores y repetir hasta que funcione correctamente.</li>
+                </ol>
+            </div>
+
+            <div class="card-warning">
+                <strong>Nota:</strong> en MySQL Workbench, si se cambia el delimitador, debe restaurarse a <code>;</code> al final; de lo contrario, los comandos posteriores pueden fallar.
+            </div>
+        </section>
+
+        <footer style="margin-top: 48px; padding-top: 24px; border-top: 2px solid #e9eef3; text-align: center; font-size: 0.9rem; color: #64748b;">
+            <p>Material educativo · Instituto Argentino de la Empresa · Analista de Sistemas · Bases de Datos</p>
+            <p style="margin-top: 4px; font-size: 0.8rem;">Teoría SP — Parte 1 · Fundamentos</p>
+        </footer>
+
+    </div>
+
+    <script>
+        (function() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = {
+                intro: document.getElementById('intro'),
+                sintaxis: document.getElementById('sintaxis'),
+                parametros: document.getElementById('parametros'),
+                variables: document.getElementById('variables'),
+                control: document.getElementById('control'),
+                funciones: document.getElementById('funciones'),
+                subconsultas: document.getElementById('subconsultas'),
+                buenas: document.getElementById('buenas')
+            };
+
+            function activateTab(tabId) {
+                Object.values(contents).forEach(el => el.classList.remove('active'));
+                if (contents[tabId]) contents[tabId].classList.add('active');
+                tabs.forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+            }
+
+            tabs.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const tabId = this.getAttribute('data-tab');
+                    if (tabId && contents[tabId]) {
+                        activateTab(tabId);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.code-block').forEach(block => {
+                const btn = block.querySelector('.copy-btn');
+                if (!btn) return;
+
+                btn.addEventListener('click', function() {
+                    const codeText = block.textContent.replace('Copiar', '').trim();
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        btn.textContent = 'Copiado!';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = 'Copiar';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(() => {
+                        const range = document.createRange();
+                        range.selectNode(block);
+                        window.getSelection().removeAllRanges();
+                        window.getSelection().addRange(range);
+                        document.execCommand('copy');
+                        btn.textContent = 'Copiado!';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = 'Copiar';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+            });
+
+            if (window.location.hash) {
+                const hash = window.location.hash.replace('#', '');
+                if (contents[hash]) activateTab(hash);
+            }
+        })();
+    </script>
+
+</body>
+</html>

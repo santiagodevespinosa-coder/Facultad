@@ -64,7 +64,6 @@ CREATE TABLE inscripciones (
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
 
-
 CREATE TABLE pagos (
     id_pago INT PRIMARY KEY AUTO_INCREMENT,
     id_inscripcion INT NOT NULL,

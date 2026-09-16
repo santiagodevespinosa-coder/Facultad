@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>MySQL: Common Table Expressions (CTE)</title>
+<style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 2rem 2rem 3rem 2rem;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 1.5rem; }
+            body { padding: 1rem 0.5rem; }
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+            border-left: 5px solid #2c6e9e;
+            padding-left: 1rem;
+        }
+        .subhead {
+            color: #334155;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        h2 {
+            font-size: 1.7rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #0c4a6e;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+        }
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        h4 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+            color: #2c3e66;
+        }
+        p { margin-bottom: 1rem; text-align: justify; }
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin: 1.2rem 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 1px solid #334155;
+        }
+        .code-block code { background: none; color: #b9f3ff; font-family: inherit; }
+        pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #eef2ff;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 12px 10px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            vertical-align: top;
+            background-color: #ffffff;
+        }
+        tr:nth-child(even) td { background-color: #f8fafc; }
+        .note {
+            background-color: #fef9e3;
+            border-left: 5px solid #eab308;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .warning {
+            background-color: #fee2e2;
+            border-left: 5px solid #ef4444;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .info {
+            background-color: #e0f2fe;
+            border-left: 5px solid #0284c7;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .success {
+            background-color: #dcfce7;
+            border-left: 5px solid #16a34a;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .inline-code {
+            background-color: #eef2ff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.4rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #b91c1c;
+        }
+        hr {
+            margin: 2rem 0;
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1);
+        }
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 0.85rem;
+            color: #475569;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        ul, ol { margin: 0.8rem 0 1rem 1.8rem; }
+        li { margin: 0.4rem 0; }
+    
+
+        .institutional-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .institutional-text {
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #111827;
+            font-weight: 500;
+        }
+        .institutional-logo {
+            width: 180px;
+            max-width: 34%;
+            height: auto;
+            object-fit: contain;
+        }
+        @media (max-width: 700px) {
+            .institutional-header { gap: 1rem; align-items: flex-start; }
+            .institutional-logo { width: 135px; max-width: 38%; }
+            .institutional-text { font-size: 0.9rem; }
+        }
+
+
+
+        /* Ajustes responsive adicionales */
+        img { max-width: 100%; }
+        table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .code-block { max-width: 100%; }
+        .code-block pre {
+            white-space: pre;
+            word-break: normal;
+            overflow-wrap: normal;
+            min-width: max-content;
+        }
+        .exercise-list {
+            margin-left: 1.5rem;
+        }
+        .exercise-list > li {
+            margin: 1rem 0 1.25rem;
+            padding-left: 0.35rem;
+        }
+        .exercise-list > li > strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: #1e293b;
+        }
+        .small-note {
+            color: #475569;
+            font-size: 0.92rem;
+        }
+        @media (max-width: 700px) {
+            h1 { font-size: 1.55rem; }
+            h2 { font-size: 1.3rem; }
+            h3 { font-size: 1.12rem; }
+            h4 { font-size: 1.03rem; }
+            p { text-align: left; }
+            .institutional-header {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+            .institutional-logo {
+                width: 125px;
+                max-width: 42%;
+            }
+            .code-block {
+                padding: 0.85rem;
+                font-size: 0.8rem;
+                border-radius: 0.75rem;
+            }
+            th, td {
+                min-width: 150px;
+                font-size: 0.88rem;
+            }
+        }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; max-width: none; }
+            .code-block { break-inside: avoid; }
+            h2, h3 { break-after: avoid; }
+        }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="institutional-header">
+<div class="institutional-text">
+<div>Instituto Argentino de la Empresa</div>
+<div>Analista de Sistemas – 2do año - Bases de Datos</div>
+</div>
+<img alt="HILET" class="institutional-logo" src="data:image/png;base64,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"/>
+</div><h1>Common Table Expressions (CTE) en MySQL</h1>
+<!-- INTRODUCCIÓN -->
+<h2>¿Qué es una CTE?</h2>
+<p>Una <strong>Common Table Expression (CTE)</strong> es una <em>tabla temporal con nombre</em>, definida dentro de una consulta mediante la cláusula <span class="inline-code">WITH</span>. Existe únicamente durante la ejecución de esa consulta y no se almacena de forma permanente en la base de datos.</p>
+<p>Las CTE permiten estructurar consultas complejas dividiéndolas en bloques lógicos con nombre, facilitando la lectura, el mantenimiento y la reutilización de resultados intermedios dentro de la misma consulta.</p>
+<div class="info"><strong>Compatibilidad:</strong> Las CTE (cláusula <span class="inline-code">WITH</span>) están disponibles a partir de <strong>MySQL 8.0</strong>. En versiones anteriores se resolvían problemas similares mediante subconsultas, tablas temporales o vistas, según el caso.</div>
+<!-- TIPOS -->
+<h2>Tipos de CTE</h2>
+<ul>
+<li><strong>CTE simples (no recursivas):</strong> definen un resultado temporal que puede referenciarse una o más veces dentro de la consulta principal. No se autoreferencian.</li>
+<li><strong>CTE recursivas:</strong> se autoreferencian mediante <span class="inline-code">WITH RECURSIVE</span>, lo que permite recorrer estructuras jerárquicas (organigramas, categorías anidadas, árboles genealógicos).</li>
+</ul>
+<hr/>
+<!-- CTE SIMPLES -->
+<h2>CTE simples</h2>
+<h3>Sintaxis básica</h3>
+<div class="code-block">
+<pre><code>WITH nombre_cte AS (
+    SELECT columnas
+    FROM tabla
+    WHERE condicion
+)
+SELECT *
+FROM nombre_cte;</code></pre>
+</div>
+<h3>CTE con múltiples bloques</h3>
+<p>Se pueden definir varias CTE separadas por coma antes de la consulta principal:</p>
+<div class="code-block">
+<pre><code>WITH
+    cte1 AS (
+        SELECT ...
+    ),
+    cte2 AS (
+        SELECT ...
+        FROM cte1     -- cte2 puede referenciar a cte1
+        JOIN ...
+    )
+SELECT *
+FROM cte2;</code></pre>
+</div>
+<hr/>
+<!-- EJEMPLOS PRÁCTICOS SIMPLES -->
+<h2>Ejemplos prácticos: CTE simples</h2>
+<h3>Ejemplo 1 – Filtrado y agregación</h3>
+<p>Calcular el promedio de salario de los empleados con sueldo mayor a $3.000:</p>
+<div class="code-block">
+<pre><code>WITH empleados_altos AS (
+    SELECT empleado_id, salario
+    FROM empleados
+    WHERE salario &gt; 3000
+)
+SELECT AVG(salario) AS promedio_salario
+FROM empleados_altos;</code></pre>
+</div>
+<h3>Ejemplo 2 – CTE con JOIN</h3>
+<p>Listar empleados junto con el nombre de su departamento:</p>
+<div class="code-block">
+<pre><code>WITH empleados_departamentos AS (
+    SELECT e.empleado_id, e.nombre, d.nombre_departamento
+    FROM empleados e
+    JOIN departamentos d ON e.departamento_id = d.departamento_id
+)
+SELECT *
+FROM empleados_departamentos
+ORDER BY nombre_departamento;</code></pre>
+</div>
+<h3>Ejemplo 3 – Reutilización de la CTE</h3>
+<p>La misma CTE se puede referenciar más de una vez dentro de la misma consulta:</p>
+<div class="code-block">
+<pre><code>WITH ventas_mensuales AS (
+    SELECT
+        YEAR(fecha)  AS anio,
+        MONTH(fecha) AS mes,
+        SUM(total)   AS total_mes
+    FROM ventas
+    GROUP BY YEAR(fecha), MONTH(fecha)
+)
+SELECT
+    anio,
+    mes,
+    total_mes,
+    (SELECT AVG(total_mes) FROM ventas_mensuales) AS promedio_general
+FROM ventas_mensuales
+ORDER BY anio, mes;</code></pre>
+</div>
+<h3>Ejemplo 4 – Cliente con mayor facturación</h3>
+<p>Usando una CTE en lugar de una subconsulta anidada:</p>
+<div class="code-block">
+<pre><code>WITH ventas_totales AS (
+    SELECT cliente_id, SUM(total) AS total_ventas
+    FROM ventas
+    GROUP BY cliente_id
+)
+SELECT c.cliente_id, c.nombre, v.total_ventas
+FROM clientes c
+JOIN ventas_totales v ON c.cliente_id = v.cliente_id
+ORDER BY v.total_ventas DESC
+LIMIT 1;</code></pre>
+</div>
+<hr/>
+<!-- CTE RECURSIVAS -->
+<h2>CTE recursivas</h2>
+<h3>¿Cuándo usar una CTE recursiva?</h3>
+<p>Las CTE recursivas son la herramienta adecuada cuando los datos tienen una <strong>estructura jerárquica o de árbol</strong>, es decir, cuando cada fila puede referenciar a otra fila de la misma tabla como su "padre":</p>
+<ul>
+<li>Organigramas (empleado → jefe → gerente → director).</li>
+<li>Categorías de productos anidadas.</li>
+<li>Comentarios con respuestas anidadas.</li>
+<li>Árbol genealógico.</li>
+</ul>
+<h3>Estructura de una CTE recursiva</h3>
+<p>Toda CTE recursiva tiene dos partes obligatorias, unidas con <span class="inline-code">UNION ALL</span>:</p>
+<div class="code-block">
+<pre><code>WITH RECURSIVE nombre_cte AS (
+
+    -- 1. PARTE ANCLA (punto de partida, sin autorreferencia)
+    SELECT columnas
+    FROM tabla
+    WHERE condicion_inicial
+
+    UNION ALL
+
+    -- 2. PARTE RECURSIVA (se autorreferencia a nombre_cte)
+    SELECT t.columnas
+    FROM tabla t
+    JOIN nombre_cte n ON t.columna_padre = n.columna_id
+
+)
+SELECT * FROM nombre_cte;</code></pre>
+</div>
+<div class="info">
+<strong>¿Cómo funciona?</strong>
+<ol style="margin-left:1.5rem; margin-top:0.5rem;">
+<li>Se ejecuta la parte ancla → genera el conjunto inicial de filas.</li>
+<li>La parte recursiva toma las filas del paso anterior y busca sus hijos en la tabla.</li>
+<li>El proceso se repite hasta que la parte recursiva no genera nuevas filas.</li>
+<li>Todos los resultados se unen (<span class="inline-code">UNION ALL</span>) en el resultado final.</li>
+</ol>
+</div>
+<h3>Ejemplo 1 – Jerarquía de empleados</h3>
+<div class="code-block">
+<pre><code>WITH RECURSIVE jerarquia AS (
+
+    -- Ancla: empleados sin jefe (nivel más alto)
+    SELECT id, nombre, id_jefe, 1 AS nivel
+    FROM empleados
+    WHERE id_jefe IS NULL
+
+    UNION ALL
+
+    -- Recursivo: empleados cuyo jefe ya está en la CTE
+    SELECT e.id, e.nombre, e.id_jefe, h.nivel + 1
+    FROM empleados e
+    JOIN jerarquia h ON e.id_jefe = h.id
+
+)
+SELECT
+    REPEAT('  ', nivel - 1) AS sangria,
+    nombre,
+    nivel
+FROM jerarquia
+ORDER BY nivel, nombre;</code></pre>
+</div>
+<h3>Ejemplo 2 – Secuencia numérica con CTE recursiva</h3>
+<p>Las CTE recursivas también permiten generar series de valores sin necesidad de tablas auxiliares:</p>
+<div class="code-block">
+<pre><code>WITH RECURSIVE numeros AS (
+    SELECT 1 AS n
+    UNION ALL
+    SELECT n + 1 FROM numeros WHERE n &lt; 10
+)
+SELECT n FROM numeros;
+-- Resultado: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10</code></pre>
+</div>
+<h3>Ejemplo 3 – Categorías anidadas</h3>
+<div class="code-block">
+<pre><code>-- Estructura de la tabla:
+-- categorias(id, nombre, id_padre)  -- id_padre NULL indica categoría raíz
+
+WITH RECURSIVE arbol_categorias AS (
+
+    -- Ancla: categorías raíz
+    SELECT id, nombre, id_padre, 0 AS profundidad, CAST(nombre AS CHAR(500)) AS ruta
+    FROM categorias
+    WHERE id_padre IS NULL
+
+    UNION ALL
+
+    -- Recursivo: subcategorías
+    SELECT c.id, c.nombre, c.id_padre, a.profundidad + 1,
+           CONCAT(a.ruta, ' &gt; ', c.nombre)
+    FROM categorias c
+    JOIN arbol_categorias a ON c.id_padre = a.id
+
+)
+SELECT ruta, profundidad
+FROM arbol_categorias
+ORDER BY ruta;</code></pre>
+</div>
+<div class="warning">
+<strong>Precaución con recursividad infinita:</strong> Si los datos tienen referencias circulares (A → B → A), la CTE recursiva puede entrar en un bucle infinito. MySQL tiene una variable de sistema <span class="inline-code">cte_max_recursion_depth</span> (por defecto 1.000 iteraciones) que detiene la recursión y lanza un error. Se puede ajustar con <span class="inline-code">SET SESSION cte_max_recursion_depth = 5000;</span>
+</div>
+<hr/>
+<!-- SUBCONSULTAS VS CTE -->
+<h2>Subconsultas vs CTE</h2>
+<p>Las CTE y las subconsultas resuelven problemas similares, pero con enfoques diferentes. La siguiente tabla muestra sus diferencias clave:</p>
+<table>
+<thead><tr><th>Característica</th><th>Subconsultas</th><th>CTE (Common Table Expressions)</th></tr></thead>
+<tbody>
+<tr><td>Definición</td><td>Consultas anidadas dentro de SELECT, FROM o WHERE</td><td>Bloques temporales con nombre, definidos con WITH</td></tr>
+<tr><td>Sintaxis</td><td>Embebida en la cláusula que la usa</td><td>Definida antes de la consulta principal</td></tr>
+<tr><td>Legibilidad</td><td>Puede ser difícil de leer con anidación profunda</td><td>Mayor legibilidad y organización del código</td></tr>
+<tr><td>Reutilización</td><td>No tiene un nombre reutilizable; si se necesita repetirla, normalmente debe escribirse nuevamente</td><td>Puede referenciarse múltiples veces dentro de la misma consulta</td></tr>
+<tr><td>Recursividad</td><td>No soporta recursividad</td><td>Sí, mediante WITH RECURSIVE</td></tr>
+<tr><td>Compatibilidad</td><td>Todas las versiones de MySQL</td><td>Requiere MySQL 8.0 o superior</td></tr>
+<tr><td>Depuración</td><td>Puede ser más difícil de aislar cuando hay mucha anidación</td><td>Los bloques con nombre facilitan separar y revisar la lógica por partes</td></tr>
+</tbody>
+</table>
+<h3>Ejemplo comparativo: cliente con mayor facturación</h3>
+<p><strong>Con subconsulta anidada:</strong></p>
+<div class="code-block">
+<pre><code>SELECT cliente_id, nombre
+FROM clientes
+WHERE cliente_id = (
+    SELECT cliente_id
+    FROM ventas
+    GROUP BY cliente_id
+    ORDER BY SUM(total) DESC
+    LIMIT 1
+);</code></pre>
+</div>
+<p><strong>Con CTE equivalente:</strong></p>
+<div class="code-block">
+<pre><code>WITH ventas_totales AS (
+    SELECT cliente_id, SUM(total) AS total_ventas
+    FROM ventas
+    GROUP BY cliente_id
+)
+SELECT c.cliente_id, c.nombre
+FROM clientes c
+JOIN ventas_totales v ON c.cliente_id = v.cliente_id
+ORDER BY v.total_ventas DESC
+LIMIT 1;</code></pre>
+</div>
+<p>Ambas consultas producen el mismo resultado. La versión CTE es más fácil de leer, especialmente cuando la lógica de cálculo es compleja o se reutiliza en varios puntos de la consulta.</p>
+<div class="note">
+<strong>¿Cuándo usar cada una?</strong>
+<ul>
+<li>Usá <strong>CTE</strong> cuando necesités legibilidad, reutilizar resultados intermedios, o manejar datos jerárquicos con recursividad.</li>
+<li>Usá <strong>subconsultas</strong> para casos muy simples, cuando la consulta es de una sola línea, o cuando necesitás compatibilidad con MySQL &lt; 8.0.</li>
+</ul>
+</div>
+<hr/>
+<!-- CTE Y OTROS OBJETOS -->
+<h2>CTE en combinación con UDF</h2>
+<h3>CTE con UDF (funciones definidas por el usuario)</h3>
+<p>Una UDF puede ser invocada dentro del bloque de una CTE, combinando la legibilidad de las CTE con la lógica encapsulada en la función:</p>
+<div class="code-block">
+<pre><code>-- Suponiendo que existe la función calcular_descuento(precio)
+WITH precios_finales AS (
+    SELECT
+        producto_id,
+        nombre,
+        precio,
+        calcular_descuento(precio) AS precio_con_descuento
+    FROM productos
+    WHERE activo = 1
+)
+SELECT *
+FROM precios_finales
+WHERE precio_con_descuento &lt; 1000
+ORDER BY precio_con_descuento;</code></pre>
+</div>
+
+
+
+
+<!-- VENTAJAS RESUMEN -->
+<h2>Ventajas de las CTE</h2>
+<table>
+<thead><tr><th>Ventaja</th><th>Descripción</th></tr></thead>
+<tbody>
+<tr>
+<td><strong>Legibilidad</strong></td>
+<td>Dividen consultas complejas en bloques lógicos con nombre, facilitando la comprensión del código.</td>
+</tr>
+<tr>
+<td><strong>Reutilización</strong></td>
+<td>La misma CTE puede referenciarse múltiples veces en la consulta, evitando repetir subconsultas.</td>
+</tr>
+<tr>
+<td><strong>Recursividad</strong></td>
+<td>Con WITH RECURSIVE permiten recorrer estructuras jerárquicas que serían imposibles con subconsultas comunes.</td>
+</tr>
+<tr>
+<td><strong>Mantenibilidad</strong></td>
+<td>Al estar nombradas y separadas, es más fácil modificar o depurar cada parte de la consulta.</td>
+</tr>
+<tr>
+<td><strong>No persisten</strong></td>
+<td>No crean objetos permanentes en la base de datos; desaparecen al finalizar la ejecución de la consulta.</td>
+</tr>
+</tbody>
+</table>
+<div class="success">
+<strong>Conclusión:</strong> Las CTE representan una herramienta fundamental del SQL moderno (MySQL 8.0+). Junto con las UDF bien diseñadas, permiten escribir consultas más claras, mantenibles y poderosas. Incorporar CTE en el flujo de trabajo es especialmente valioso en consultas analíticas, reportes y cualquier escenario que involucre datos jerárquicos o resultados intermedios reutilizables.
+    </div>
+<footer>Instituto Argentino de la Empresa · Analista de Sistemas · 2do año · Bases de Datos | Apunte: Common Table Expressions (CTE) en MySQL</footer>
+</div>
+</body>
+</html>

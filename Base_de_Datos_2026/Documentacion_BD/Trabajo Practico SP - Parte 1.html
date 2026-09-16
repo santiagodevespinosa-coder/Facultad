@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP SP - Parte 1 | Procedimientos Almacenados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f4f7fc;
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            padding: 0 30px 40px;
+        }
+
+        .institutional-header {
+            background: linear-gradient(145deg, #0b2b4a, #1a4b6d);
+            color: white;
+            padding: 28px 30px 20px;
+            margin: 0 -30px 30px;
+            border-bottom: 4px solid #f5b042;
+        }
+
+        .institutional-header .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+        }
+
+        .institutional-header .instituto {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .institutional-header .instituto strong {
+            font-weight: 600;
+            color: #f5b042;
+        }
+
+        .institutional-header .carrera {
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        .institutional-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-top: 14px;
+            letter-spacing: -0.5px;
+        }
+
+        .institutional-header h1 small {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.75;
+            display: block;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .institutional-header .badge {
+            display: inline-block;
+            background: #f5b042;
+            color: #0b2b4a;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 4px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0b2b4a;
+            margin: 32px 0 16px;
+            letter-spacing: -0.3px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a4b6d;
+            margin: 24px 0 10px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: #1e293b;
+        }
+
+        ul, ol {
+            margin: 10px 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .important {
+            background: #f1f5f9;
+            border-left: 4px solid #0b2b4a;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 18px 0;
+        }
+
+        .important strong {
+            color: #0b2b4a;
+        }
+
+        .code-block {
+            position: relative;
+            background: #0f1a2b;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 14px;
+            margin: 16px 0 22px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .code-block .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #b0c4de;
+            font-size: 0.8rem;
+            padding: 4px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .code-block .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+        }
+
+        .code-block .copy-btn.copied {
+            background: #2e7d5e;
+            color: white;
+        }
+
+        .sql-kw { color: #7dd3fc; font-weight: 600; }
+        .sql-fn { color: #86efac; }
+        .sql-str { color: #fbbf24; }
+        .sql-num { color: #f472b6; }
+        .sql-cmt { color: #94a3b8; font-style: italic; }
+        .sql-var { color: #c4b5fd; }
+        .sql-op { color: #fca5a5; }
+
+        .card-tip {
+            background: #ecfdf5;
+            border-left: 5px solid #10b981;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+
+        .card-tip strong {
+            color: #065f46;
+        }
+
+        .card-warning {
+            background: #fffbeb;
+            border-left: 5px solid #f59e0b;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin: 18px 0;
+        }
+
+        .card-warning strong {
+            color: #92400e;
+        }
+
+        .card-exercise {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 18px 0;
+        }
+
+        .card-exercise .num {
+            display: inline-block;
+            background: #0b2b4a;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+
+        .card-exercise .title {
+            font-weight: 600;
+            color: #0b2b4a;
+            font-size: 1.05rem;
+        }
+
+        .card-exercise .content {
+            margin-top: 8px;
+            padding-left: 44px;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 0 16px 30px; }
+            .institutional-header { padding: 20px 18px 16px; margin: 0 -16px 24px; }
+            .institutional-header .top-row { flex-direction: column; align-items: flex-start; }
+            .institutional-header h1 { font-size: 1.6rem; }
+            .code-block { font-size: 0.8rem; padding: 16px 14px; }
+            .code-block .copy-btn { font-size: 0.7rem; padding: 2px 12px; top: 8px; right: 10px; }
+            .card-exercise .content { padding-left: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .institutional-header h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="institutional-header">
+            <div class="top-row">
+                <span class="instituto"><strong>Instituto Argentino de la Empresa</strong></span>
+                <span class="carrera">Analista de Sistemas · 2do año · Bases de Datos</span>
+            </div>
+            <h1>
+                Trabajo Práctico: Procedimientos Almacenados
+                <small>Parte 1 — Fundamentos · Parámetros · Estructuras de control · Subconsultas</small>
+            </h1>
+            <span class="badge">Enunciados</span>
+        </header>
+
+        <section>
+            <h2>Estructura de las tablas</h2>
+
+            <p>Para la resolución de todos los ejercicios, utilizar las siguientes tablas. Crearlas en la base de datos antes de comenzar.</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copiar</button>
+                <span class="sql-cmt">-- Tabla de clientes</span>
+                <span class="sql-kw">CREATE TABLE</span> clientes (
+                    id_cliente <span class="sql-kw">INT AUTO_INCREMENT PRIMARY KEY</span>,
+                    nombre <span class="sql-kw">VARCHAR</span>(<span class="sql-num">100</span>) <span class="sql-kw">NOT NULL</span>,
+                    saldo <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>) <span class="sql-kw">NOT NULL</span>
+                );
+
+                <span class="sql-cmt">-- Tabla de compras</span>
+                <span class="sql-kw">CREATE TABLE</span> compras (
+                    id_compra <span class="sql-kw">INT AUTO_INCREMENT PRIMARY KEY</span>,
+                    id_cliente <span class="sql-kw">INT</span>,
+                    fecha <span class="sql-kw">DATE</span>,
+                    monto <span class="sql-kw">DECIMAL</span>(<span class="sql-num">10</span>,<span class="sql-num">2</span>),
+                    <span class="sql-kw">FOREIGN KEY</span> (id_cliente) <span class="sql-kw">REFERENCES</span> clientes(id_cliente)
+                );
+
+                <span class="sql-cmt">-- Datos de prueba</span>
+                <span class="sql-kw">INSERT INTO</span> clientes (nombre, saldo) <span class="sql-kw">VALUES</span>
+                    (<span class="sql-str">'Juan Pérez'</span>, <span class="sql-num">1000</span>),
+                    (<span class="sql-str">'María López'</span>, <span class="sql-num">500</span>),
+                    (<span class="sql-str">'Pedro Gómez'</span>, <span class="sql-num">2000</span>);
+
+                <span class="sql-kw">INSERT INTO</span> compras (id_cliente, fecha, monto) <span class="sql-kw">VALUES</span>
+                    (<span class="sql-num">1</span>, <span class="sql-str">'2023-11-01'</span>, <span class="sql-num">100</span>),
+                    (<span class="sql-num">2</span>, <span class="sql-str">'2023-11-05'</span>, <span class="sql-num">250</span>);
+            </div>
+
+            <div class="important">
+                <strong>Nota:</strong> todos los procedimientos deben crearse utilizando <span class="highlight">DELIMITER //</span> y deben estar correctamente delimitados. Restaurar el delimitador al final de cada creación.
+            </div>
+        </section>
+
+        <section>
+            <h2>Ejercicios</h2>
+
+            <!-- Ejercicio 1 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">1</span> Insertar un cliente</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">insertar_cliente</span> que permita agregar un cliente a la tabla <code>clientes</code>.</p>
+                    <p><strong>Parámetros de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_nombre</code> — nombre del cliente (VARCHAR)</li>
+                        <li><code>p_saldo_inicial</code> — saldo inicial (DECIMAL)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ejercicio 2 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">2</span> Actualizar el nombre de un cliente</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">actualizar_nombre_cliente</span> que permita cambiar el nombre de un cliente.</p>
+                    <p><strong>Parámetros de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_id_cliente</code> — identificador del cliente (INT)</li>
+                        <li><code>p_nuevo_nombre</code> — nuevo nombre (VARCHAR)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ejercicio 3 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">3</span> Eliminar un cliente</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">eliminar_cliente</span> que permita eliminar un cliente dado su <code>id_cliente</code>.</p>
+                    <p><strong>Parámetro de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_id_cliente</code> — identificador del cliente (INT)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ejercicio 4 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">4</span> Obtener el saldo de un cliente</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">consultar_saldo</span> que reciba el <code>id_cliente</code> y devuelva el saldo del cliente.</p>
+                    <p><strong>Parámetros:</strong></p>
+                    <ul>
+                        <li><code>IN p_id_cliente</code> — identificador del cliente (INT)</li>
+                        <li><code>OUT p_saldo</code> — saldo del cliente (DECIMAL)</li>
+                    </ul>
+                    <div class="card-tip">
+                        <strong>Observación:</strong> utilizar <code>SELECT saldo INTO p_saldo FROM clientes WHERE ...</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ejercicio 5 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">5</span> Incrementar el saldo de un cliente</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">incrementar_saldo_cliente</span> que permita sumar una cantidad al saldo actual de un cliente.</p>
+                    <p><strong>Parámetros de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_id_cliente</code> — identificador del cliente (INT)</li>
+                        <li><code>p_cantidad</code> — cantidad a incrementar (DECIMAL)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ejercicio 6 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">6</span> Transferir saldo entre clientes</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">transferir_saldo</span> que permita transferir un saldo de un cliente a otro.</p>
+                    <p><strong>Parámetros de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_origen_id</code> — ID del cliente que transfiere (INT)</li>
+                        <li><code>p_destino_id</code> — ID del cliente que recibe (INT)</li>
+                        <li><code>p_monto</code> — monto a transferir (DECIMAL)</li>
+                    </ul>
+                    <div class="card-warning">
+                        <strong>Requisito:</strong> controlar que el saldo del cliente origen sea suficiente para realizar la transferencia.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ejercicio 7 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">7</span> Consultar clientes por rango de saldo</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">consultar_clientes_por_saldo</span> que devuelva todos los clientes cuyo saldo se encuentre entre dos valores.</p>
+                    <p><strong>Parámetros de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_saldo_min</code> — saldo mínimo (DECIMAL)</li>
+                        <li><code>p_saldo_max</code> — saldo máximo (DECIMAL)</li>
+                    </ul>
+                    <div class="card-tip">
+                        <strong>Observación:</strong> utilizar la cláusula <code>BETWEEN</code> en la condición <code>WHERE</code>.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ejercicio 8 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">8</span> Registrar una compra</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">registrar_compra</span> que permita registrar una compra hecha por un cliente.</p>
+                    <p><strong>Parámetros de entrada:</strong></p>
+                    <ul>
+                        <li><code>p_id_cliente</code> — identificador del cliente (INT)</li>
+                        <li><code>p_monto</code> — monto de la compra (DECIMAL)</li>
+                    </ul>
+                    <p><strong>Acciones a realizar:</strong></p>
+                    <ol>
+                        <li>Insertar el registro en la tabla <code>compras</code> (utilizar <code>CURDATE()</code> para la fecha)</li>
+                        <li>Actualizar el saldo del cliente restando el monto de la compra</li>
+                    </ol>
+                    <div class="card-tip">
+                        <strong>Observación:</strong> utilizar <code>LAST_INSERT_ID()</code> para obtener el ID de la compra recién creada y mostrarlo como resultado.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ejercicio 9 -->
+            <div class="card-exercise">
+                <div class="title"><span class="num">9</span> Listar clientes con filtros avanzados</div>
+                <div class="content">
+                    <p>Crear un procedimiento llamado <span class="highlight">listar_clientes_avanzado</span> que permita listar clientes según varios filtros opcionales.</p>
+                    <p><strong>Parámetros de entrada (todos opcionales):</strong></p>
+                    <ul>
+                        <li><code>p_nombre</code> — filtro por nombre (utilizar LIKE) — si es NULL, no filtrar</li>
+                        <li><code>p_saldo_min</code> — saldo mínimo — si es NULL, no filtrar</li>
+                        <li><code>p_saldo_max</code> — saldo máximo — si es NULL, no filtrar</li>
+                        <li><code>p_fecha_desde</code> — fecha mínima de última compra — si es NULL, no filtrar</li>
+                    </ul>
+                    <p><strong>Consideraciones:</strong></p>
+                    <ul>
+                        <li>Para el filtro por nombre, utilizar <code>LIKE CONCAT('%', p_nombre, '%')</code></li>
+                        <li>Para el filtro por saldo, utilizar <code>BETWEEN</code> o condiciones con <code>>=</code> y <code><=</code></li>
+                        <li>Para el filtro por fecha, considerar la fecha de la última compra de cada cliente</li>
+                    </ul>
+                    <div class="card-warning">
+                        <strong>Nota:</strong> este ejercicio combina varios conceptos. Construir la consulta de manera que los filtros se apliquen solo cuando el parámetro no sea NULL.
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <footer style="margin-top: 48px; padding-top: 24px; border-top: 2px solid #e9eef3; text-align: center; font-size: 0.9rem; color: #64748b;">
+            <p>Material educativo · Instituto Argentino de la Empresa · Analista de Sistemas · Bases de Datos</p>
+            <p style="margin-top: 4px; font-size: 0.8rem;">TP SP — Parte 1 · Enunciados</p>
+        </footer>
+
+    </div>
+
+    <script>
+        (function() {
+            document.querySelectorAll('.code-block').forEach(block => {
+                const btn = block.querySelector('.copy-btn');
+                if (!btn) return;
+
+                btn.addEventListener('click', function() {
+                    const codeText = block.textContent.replace('Copiar', '').trim();
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        btn.textContent = 'Copiado!';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = 'Copiar';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(() => {
+                        const range = document.createRange();
+                        range.selectNode(block);
+                        window.getSelection().removeAllRanges();
+                        window.getSelection().addRange(range);
+                        document.execCommand('copy');
+                        btn.textContent = 'Copiado!';
+                        btn.classList.add('copied');
+                        setTimeout(() => {
+                            btn.textContent = 'Copiar';
+                            btn.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>

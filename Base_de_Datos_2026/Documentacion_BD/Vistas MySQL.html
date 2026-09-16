@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vistas en Bases de Datos MySQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            line-height: 1.55;
+            color: #1a2c3e;
+            padding: 2rem 1rem;
+        }
+
+        .doc {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 2rem 2rem 3rem 2rem;
+        }
+
+        .letterhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #cbdde6;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .letterhead .institucion p {
+            margin-bottom: 0.1rem;
+            font-size: 0.95rem;
+            color: #33495a;
+        }
+
+        .letterhead .institucion p:first-child {
+            font-weight: 700;
+            color: #0e3b4b;
+            font-size: 1.05rem;
+        }
+
+        .letterhead .logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            color: #1f6e8c;
+            border: 2px solid #1f6e8c;
+            padding: 0.3rem 0.8rem;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            border-left: 5px solid #1f6e8c;
+            padding-left: 1.2rem;
+            margin: 0 0 0.5rem 0;
+            color: #0e3b4b;
+        }
+
+        h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #cbdde6;
+            color: #1f5e78;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.8rem 0;
+            color: #2c6e8f;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            margin: 0.8rem 0 1rem 1.8rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        pre {
+            background: #f4f9fe;
+            border-left: 4px solid #1f6e8c;
+            padding: 1rem 1.2rem;
+            border-radius: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            margin: 1.2rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f0f2f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #1f5e78;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #1c3e4f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        th {
+            background: #e4edf2;
+            color: #0f445b;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #cbdae2;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid #e2e8ed;
+            vertical-align: top;
+        }
+
+        .info-box {
+            background: #eef6fa;
+            border-left: 5px solid #2c8eb3;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            margin: 1.2rem 0;
+        }
+
+        .warning-box {
+            background: #fff7eb;
+            border-left: 5px solid #e6a017;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            margin: 1.2rem 0;
+        }
+
+        .example-box {
+            background: #fafdfe;
+            border: 1px solid #d4e2ea;
+            border-radius: 20px;
+            padding: 0.2rem 1.5rem 1rem 1.5rem;
+            margin: 1.8rem 0;
+        }
+
+        .example-box h4 {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin: 1rem 0 0.5rem 0;
+            color: #1f6e8c;
+        }
+
+        hr {
+            margin: 2rem 0;
+            border: none;
+            height: 1px;
+            background: #cde1ea;
+        }
+
+        .badge {
+            background: #e4edf2;
+            color: #1f5e78;
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+        }
+
+        footer {
+            margin-top: 2.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5b7e93;
+            border-top: 1px solid #cde1ea;
+            padding-top: 1.8rem;
+        }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .doc { padding: 1rem; box-shadow: none; }
+            h2, h3 { break-after: avoid; }
+            pre, .example-box, table, .info-box, .warning-box { break-inside: avoid; page-break-inside: avoid; }
+        }
+
+        @media (max-width: 700px) {
+            .doc { padding: 1.2rem; }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+            pre { font-size: 0.75rem; }
+            .letterhead { flex-direction: column; gap: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="doc">
+
+    <div class="letterhead">
+        <div class="institucion">
+            <p>Instituto Argentino de la Empresa</p>
+            <p>Analista de Sistemas</p>
+            <p>Bases de Datos – 2º año</p>
+        </div>
+        <div class="logo">HILET</div>
+    </div>
+
+    <div class="badge">Bases de Datos II | MySQL</div>
+    <h1>Vistas en Bases de Datos MySQL</h1>
+
+    <h2>Introducción</h2>
+    <p>Las <strong>vistas</strong> en MySQL son una herramienta que permite a los usuarios interactuar con los datos de una manera más sencilla y segura. Una vista es una <strong>tabla virtual</strong> cuyo contenido se define mediante una consulta. A diferencia de una tabla, una vista no almacena datos físicamente, sino que genera los datos dinámicamente cada vez que se consulta.</p>
+
+    <h2>¿Qué es una vista?</h2>
+    <p>Una vista es una consulta almacenada que se puede tratar como una tabla. Se utiliza para simplificar la complejidad de las consultas, proporcionar seguridad y presentar los datos de una manera específica. Sus usos principales son:</p>
+    <ul>
+        <li><strong>Simplicidad:</strong> encapsular consultas complejas en una vista que se puede consultar fácilmente.</li>
+        <li><strong>Seguridad:</strong> restringir el acceso a datos sensibles, mostrando solo la información necesaria a través de la vista.</li>
+        <li><strong>Mantenimiento:</strong> centralizar consultas complejas en un único punto.</li>
+        <li><strong>Consistencia:</strong> asegurar que las consultas reutilizadas sean consistentes en toda la aplicación.</li>
+    </ul>
+
+    <h2>Características de las vistas</h2>
+    <ol>
+        <li><strong>Es una tabla virtual:</strong> no almacena datos físicamente, muestra los datos de las tablas subyacentes.</li>
+        <li><strong>Actualización dinámica:</strong> los datos siempre están al día, ya que se generan en tiempo real a partir de las tablas base.</li>
+        <li><strong>Seguridad:</strong> puede restringir el acceso a datos sensibles mostrando solo columnas y filas necesarias.</li>
+        <li><strong>Simplificación:</strong> encapsula lógica compleja en una sola consulta reutilizable.</li>
+        <li><strong>Compatibilidad:</strong> ofrece una interfaz consistente incluso si cambia el esquema de las tablas subyacentes.</li>
+        <li><strong>Rendimiento:</strong> MySQL no soporta vistas indexadas, por lo que en consultas muy pesadas conviene evaluar alternativas como tablas temporales.</li>
+    </ol>
+
+    <h2>Tipos de vistas</h2>
+    <ol>
+        <li><strong>Vistas simples:</strong> basadas en una sola tabla. Pueden ser "actualizables" (permiten <code>UPDATE</code>, <code>DELETE</code>, <code>INSERT</code>) solo si están basadas en una única tabla y no usan <code>JOIN</code>, <code>UNION</code>, <code>DISTINCT</code>, subconsultas ni funciones de agregado.</li>
+        <li><strong>Vistas complejas:</strong> basadas en múltiples tablas, pueden incluir funciones agregadas. No son actualizables, por la dificultad de asegurar consistencia e integridad.</li>
+        <li><strong>Vistas materializadas:</strong> MySQL no las soporta de forma nativa, pero pueden simularse mediante tablas temporales y triggers.</li>
+    </ol>
+
+    <h2>Limitaciones de las vistas</h2>
+    <ul>
+        <li><strong>No almacenan datos:</strong> pueden afectar el rendimiento en consultas muy complejas, ya que se recalculan en cada acceso.</li>
+        <li><strong>Actualización restringida:</strong> no todas las vistas son actualizables, especialmente las que incluyen funciones agregadas o combinaciones complejas.</li>
+        <li><strong>Rendimiento:</strong> el optimizador de consultas puede tener dificultades por factores como la complejidad de la consulta, los índices de las tablas base, funciones agregadas, <code>GROUP BY</code> y el tamaño de las tablas involucradas.</li>
+        <li><strong>Restricciones de sintaxis:</strong> no pueden contener <code>ORDER BY</code> a menos que se use junto con <code>LIMIT</code>.</li>
+        <li><strong>Seguridad parcial:</strong> restringen columnas visibles, pero no ocultan los datos si el usuario tiene permisos directos sobre las tablas base.</li>
+        <li><strong>Sin índices propios:</strong> al no almacenar datos físicamente, no pueden tener índices; dependen de los índices de las tablas subyacentes.</li>
+        <li><strong>Dependencia de las tablas base:</strong> cambios de estructura o eliminación de columnas pueden invalidar las vistas que dependen de ellas.</li>
+        <li><strong>Limitaciones con <code>UNION</code>/<code>UNION ALL</code>:</strong> este tipo de vistas suele perder la capacidad de actualizar datos.</li>
+        <li><strong>Depuración más difícil:</strong> la lógica de la vista queda oculta en su definición, lo que complica el seguimiento de errores en consultas que la utilizan.</li>
+    </ul>
+
+    <h2>Sintaxis general para crear una vista</h2>
+    <pre><code>CREATE
+    [OR REPLACE]
+    VIEW nombre_vista [(columna1, columna2, ...)]  -- por defecto, mismos nombres que las columnas de las tablas
+AS
+    sentencia_select
+[WITH [CASCADED | LOCAL] CHECK OPTION];</code></pre>
+
+    <div class="example-box">
+        <h4>Ejemplo básico</h4>
+        <pre><code>CREATE VIEW comprasXcliente AS
+SELECT
+    c.CLI_ID,
+    c.APELLIDO,
+    c.NOMBRES,
+    v.FECHA_COMPRA
+FROM
+    clientes c,
+    ventas v
+WHERE
+    c.CLI_ID = v.CLI_ID;
+
+-- La vista se consulta como cualquier tabla
+SELECT * FROM comprasXcliente;</code></pre>
+    </div>
+
+    <div class="example-box">
+        <h4>Ejemplo con columnas renombradas</h4>
+        <pre><code>CREATE OR REPLACE VIEW clientes_activos (id_cliente, nombre_completo, email) AS
+SELECT cli_id, CONCAT(apellido, ', ', nombres), correo_electronico
+FROM clientes
+WHERE estado = 'activo';</code></pre>
+    </div>
+
+    <h2><code>WITH CHECK OPTION</code>: LOCAL vs CASCADED</h2>
+    <p>Se utiliza al crear o modificar una vista para controlar cómo se manejan las inserciones y actualizaciones de datos a través de ella. Su objetivo es asegurar que cualquier cambio realizado a través de la vista cumpla con las condiciones definidas en el <code>SELECT</code> que la define.</p>
+    <div class="info-box">
+        <strong>LOCAL:</strong>
+        <ul>
+            <li>Las comprobaciones de la cláusula <code>WHERE</code> se aplican solo a la vista específica donde se define <code>CHECK OPTION</code>.</li>
+            <li>Si la vista se basa en otra vista (vista anidada), no se tienen en cuenta las comprobaciones de esa vista base.</li>
+        </ul>
+        <strong>CASCADED:</strong>
+        <ul>
+            <li>Las comprobaciones se aplican no solo a la vista actual, sino también a todas las vistas subyacentes que tengan <code>CHECK OPTION</code> definido.</li>
+            <li>Asegura que cualquier cambio cumpla las condiciones de toda la cadena de vistas anidadas.</li>
+        </ul>
+    </div>
+
+    <div class="example-box">
+        <h4>Ejemplo: vista simple con CHECK OPTION</h4>
+        <pre><code>CREATE OR REPLACE VIEW clientes_por_ciudad AS
+SELECT nombre, apellido, email
+FROM Clientes
+WHERE ciudad = 'Madrid'
+WITH CHECK OPTION;
+
+-- Falla: no se puede insertar la ciudad, entonces no se puede verificar
+-- que cumpla la condición del WHERE de la vista
+INSERT INTO clientes_por_ciudad (nombre, apellido, email)
+VALUES ('Pedro', 'Sánchez', 'pedro.sanchez@email.com');</code></pre>
+        <p>Si en cambio la vista expone la columna <code>ciudad</code>, sí se puede insertar siempre que el valor sea <code>'Madrid'</code>:</p>
+        <pre><code>CREATE OR REPLACE VIEW clientes_por_ciudad AS
+SELECT nombre, apellido, email, ciudad
+FROM Clientes
+WHERE ciudad = 'Madrid'
+WITH CHECK OPTION;
+
+-- Esta sí funciona
+INSERT INTO clientes_por_ciudad (nombre, apellido, email, ciudad)
+VALUES ('Pedro', 'Sánchez', 'pedro.sanchez@email.com', 'Madrid');</code></pre>
+    </div>
+
+    <div class="example-box">
+        <h4>Ejemplo: CASCADE en vistas anidadas</h4>
+        <pre><code>CREATE OR REPLACE VIEW clientes_madrid AS
+SELECT nombre, apellido, ciudad
+FROM Clientes
+WHERE ciudad = 'Madrid'
+WITH CHECK OPTION CASCADE;
+
+CREATE OR REPLACE VIEW clientes_primera_letra_a AS
+SELECT nombre, apellido, ciudad
+FROM clientes_madrid
+WHERE nombre LIKE 'A%'
+WITH CHECK OPTION CASCADE;
+
+-- Falla: el nombre empieza con 'A' (cumple su propia condición),
+-- pero la ciudad no es Madrid (no cumple la condición de la vista base)
+INSERT INTO clientes_primera_letra_a (nombre, apellido, ciudad)
+VALUES ('Ana', 'Lopez', 'Barcelona');
+
+-- Funciona: cumple ambas condiciones
+INSERT INTO clientes_primera_letra_a (nombre, apellido, ciudad)
+VALUES ('Ana', 'Lopez', 'Madrid');</code></pre>
+        <p>Con <code>CASCADE</code>, cualquier operación sobre la vista derivada verifica tanto su propia condición como la de la vista base de la que depende.</p>
+    </div>
+
+    <h2>Vista "Simple" (actualizable)</h2>
+    <div class="example-box">
+        <h4>Ejemplo</h4>
+        <pre><code>CREATE TABLE empleados (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50),
+    departamento VARCHAR(50),
+    salario DECIMAL(10, 2)
+);
+
+CREATE VIEW vista_empleados AS
+SELECT nombre, departamento
+FROM empleados;
+
+-- Al ser una vista simple (una sola tabla, sin JOIN/GROUP BY/agregados),
+-- es actualizable:
+UPDATE vista_empleados
+SET departamento = 'Recursos Humanos'
+WHERE nombre = 'Juan';</code></pre>
+    </div>
+
+    <h2>Vista "Compleja" (no actualizable)</h2>
+    <div class="example-box">
+        <h4>Ejemplo</h4>
+        <pre><code>CREATE TABLE productos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50),
+    precio DECIMAL(10, 2)
+);
+
+CREATE TABLE ventas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    producto_id INT,
+    cantidad INT,
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+);
+
+CREATE VIEW vista_productos_ventas AS
+SELECT p.nombre, p.precio, SUM(v.cantidad) AS total_ventas
+FROM productos p
+JOIN ventas v ON p.id = v.producto_id
+GROUP BY p.nombre, p.precio;
+
+-- Esto genera un error: la vista usa JOIN, SUM y GROUP BY,
+-- por lo que no es actualizable
+UPDATE vista_productos_ventas
+SET precio = 25.00
+WHERE nombre = 'Producto A';</code></pre>
+    </div>
+
+    <h2>Modificar y eliminar una vista</h2>
+    <p>MySQL no permite modificar directamente la definición interna de una vista de forma incremental. Las dos formas habituales de "modificarla" son:</p>
+    <ul>
+        <li><strong>Reemplazar la definición:</strong> <code>CREATE OR REPLACE VIEW ...</code> (si la vista existe, la sobreescribe).</li>
+        <li><strong>Eliminar y volver a crear:</strong> primero <code>DROP VIEW</code> y luego <code>CREATE VIEW</code> con la nueva definición.</li>
+    </ul>
+    <pre><code>-- Eliminar una vista
+DROP VIEW vista_empleados;
+
+-- Eliminación segura (no falla si no existe)
+DROP VIEW IF EXISTS vista_empleados;</code></pre>
+
+    <div class="warning-box">
+        <strong>Para recordar:</strong> una vista no acepta parámetros en su definición (no es como una función). Si necesitás lógica parametrizable, la vista se combina con procedimientos almacenados o funciones, y los valores se pasan directamente en el <code>INSERT</code>/<code>UPDATE</code> que se ejecuta contra ella.
+    </div>
+
+    <hr>
+    <footer>
+        Documento sobre Vistas en Bases de Datos MySQL — Bases de Datos, 2º año.
+    </footer>
+</div>
+</body>
+</html>

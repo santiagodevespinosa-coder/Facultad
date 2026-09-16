@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+<title>Trabajo Práctico – UDF y CTE en MySQL</title>
+<style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 2rem 2rem 3rem 2rem;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 1.5rem; }
+            body { padding: 1rem 0.5rem; }
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+            border-left: 5px solid #2c6e9e;
+            padding-left: 1rem;
+        }
+        .subhead {
+            color: #334155;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        h2 {
+            font-size: 1.7rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #0c4a6e;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+        }
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        h4 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+            color: #2c3e66;
+        }
+        p { margin-bottom: 1rem; text-align: justify; }
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem 1.2rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin: 1.2rem 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 1px solid #334155;
+        }
+        .code-block code { background: none; color: #b9f3ff; font-family: inherit; }
+        pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #eef2ff;
+            color: #1e293b;
+            font-weight: 600;
+            padding: 12px 10px;
+            border: 1px solid #cbd5e1;
+            text-align: center;
+        }
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            vertical-align: top;
+            background-color: #ffffff;
+        }
+        tr:nth-child(even) td { background-color: #f8fafc; }
+        .note {
+            background-color: #fef9e3;
+            border-left: 5px solid #eab308;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .warning {
+            background-color: #fee2e2;
+            border-left: 5px solid #ef4444;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .info {
+            background-color: #e0f2fe;
+            border-left: 5px solid #0284c7;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .success {
+            background-color: #dcfce7;
+            border-left: 5px solid #16a34a;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            margin: 1.2rem 0;
+        }
+        .inline-code {
+            background-color: #eef2ff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.4rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #b91c1c;
+        }
+        hr {
+            margin: 2rem 0;
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1);
+        }
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            font-size: 0.85rem;
+            color: #475569;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        ul, ol { margin: 0.8rem 0 1rem 1.8rem; }
+        li { margin: 0.4rem 0; }
+    
+
+        .institutional-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .institutional-text {
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #111827;
+            font-weight: 500;
+        }
+        .institutional-logo {
+            width: 180px;
+            max-width: 34%;
+            height: auto;
+            object-fit: contain;
+        }
+        @media (max-width: 700px) {
+            .institutional-header { gap: 1rem; align-items: flex-start; }
+            .institutional-logo { width: 135px; max-width: 38%; }
+            .institutional-text { font-size: 0.9rem; }
+        }
+
+
+
+        /* Ajustes responsive adicionales */
+        img { max-width: 100%; }
+        table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .code-block { max-width: 100%; }
+        .code-block pre {
+            white-space: pre;
+            word-break: normal;
+            overflow-wrap: normal;
+            min-width: max-content;
+        }
+        .exercise-list {
+            margin-left: 1.5rem;
+        }
+        .exercise-list > li {
+            margin: 1rem 0 1.25rem;
+            padding-left: 0.35rem;
+        }
+        .exercise-list > li > strong {
+            display: block;
+            margin-bottom: 0.35rem;
+            color: #1e293b;
+        }
+        .small-note {
+            color: #475569;
+            font-size: 0.92rem;
+        }
+        @media (max-width: 700px) {
+            h1 { font-size: 1.55rem; }
+            h2 { font-size: 1.3rem; }
+            h3 { font-size: 1.12rem; }
+            h4 { font-size: 1.03rem; }
+            p { text-align: left; }
+            .institutional-header {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+            .institutional-logo {
+                width: 125px;
+                max-width: 42%;
+            }
+            .code-block {
+                padding: 0.85rem;
+                font-size: 0.8rem;
+                border-radius: 0.75rem;
+            }
+            th, td {
+                min-width: 150px;
+                font-size: 0.88rem;
+            }
+        }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; max-width: none; }
+            .code-block { break-inside: avoid; }
+            h2, h3 { break-after: avoid; }
+        }
+
+        .tp-intro { margin-bottom: 1.5rem; }
+        .script-label {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #075985;
+            font-weight: 700;
+            padding: 0.25rem 0.55rem;
+            border-radius: 0.45rem;
+            margin-bottom: 0.5rem;
+        }
+        .checklist li { margin-bottom: 0.55rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="institutional-header">
+<div class="institutional-text">
+<div>Instituto Argentino de la Empresa</div>
+<div>Analista de Sistemas – 2do año - Bases de Datos</div>
+</div>
+<img alt="HILET" class="institutional-logo" src="data:image/png;base64,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"/>
+</div>
+<h1>Trabajo Práctico – UDF y CTE en MySQL</h1>
+<div class="info tp-intro"><strong>Entorno:</strong> resolver con MySQL 8.0 o superior. Trabajar sobre una base nueva o sobre un esquema de práctica para evitar conflictos con tablas existentes.</div>
+
+<h2>Parte 1 – UDF</h2>
+<ol class="exercise-list">
+<li><strong>Obtener nombre completo del cliente</strong>Crear una función que reciba el identificador de un cliente y devuelva su nombre y apellido concatenados en un único texto.</li>
+<li><strong>Calcular el valor promedio de ventas por cliente</strong>Diseñar una función que reciba el identificador de un cliente y devuelva el promedio del valor de sus ventas.</li>
+<li><strong>Obtener la antigüedad de un empleado</strong>Crear una función que reciba el identificador de un empleado y calcule su antigüedad en años a partir de la fecha de contratación.</li>
+<li><strong>Calcular comisión de ventas</strong>Crear una función que reciba el identificador de un cliente y devuelva una comisión equivalente al 10% del valor total de sus ventas.</li>
+<li><strong>Obtener jefe de un departamento</strong>Diseñar una función que reciba el identificador de un departamento y devuelva el nombre del empleado asignado como jefe. Si no existe un jefe asignado, devolver <span class="inline-code">NULL</span>.</li>
+<li><strong>Calcular total de ventas en un rango de fechas</strong>Crear una función que reciba una fecha inicial y una fecha final y devuelva el valor total de las ventas comprendidas en ese rango, incluyendo ambas fechas.</li>
+<li><strong>Calcular porcentaje de salario respecto al total del departamento</strong>Diseñar una función que reciba el identificador de un empleado y calcule qué porcentaje representa su salario respecto de la suma de salarios de su departamento.</li>
+<li><strong>Determinar si un cliente no tiene ventas</strong>Crear una función que reciba el identificador de un cliente y devuelva <span class="inline-code">1</span> si no tiene ventas registradas y <span class="inline-code">0</span> en caso contrario.</li>
+<li><strong>Calcular número de ventas por cliente</strong>Diseñar una función que reciba el identificador de un cliente y devuelva la cantidad total de ventas registradas para él.</li>
+<li><strong>Obtener nombre del departamento de un empleado</strong>Crear una función que reciba el identificador de un empleado y devuelva el nombre del departamento al que pertenece.</li>
+</ol>
+<div class="note"><strong>Importante:</strong> cuando una función consulte tablas, declarar la característica correspondiente (<span class="inline-code">READS SQL DATA</span>) y analizar si su resultado debe considerarse <span class="inline-code">DETERMINISTIC</span> o <span class="inline-code">NOT DETERMINISTIC</span>.</div>
+
+<hr/>
+<h2>Parte 2 – CTE</h2>
+<ol class="exercise-list">
+<li><strong>Filtrar datos con CTE</strong>Crear una CTE llamada <span class="inline-code">VentasAltas</span> que seleccione todas las ventas con un valor mayor a 1000. En la consulta principal, mostrar la cantidad de ventas y el valor promedio de las ventas contenidas en la CTE.</li>
+<li><strong>CTE con funciones de agregado</strong>Crear una CTE llamada <span class="inline-code">PromedioPorDepartamento</span> que calcule el promedio de salarios por departamento. En la consulta principal, mostrar únicamente los departamentos cuyo salario promedio sea superior a 4000.</li>
+<li><strong>CTE para calcular diferencias entre fechas</strong>Crear una CTE llamada <span class="inline-code">AntiguedadEmpleados</span> que calcule, mediante <span class="inline-code">DATEDIFF()</span>, la cantidad de días transcurridos desde la fecha de contratación de cada empleado hasta la fecha actual. En la consulta principal, mostrar los empleados con más de 1825 días de antigüedad (aproximadamente 5 años).</li>
+<li><strong>CTE para combinar varias tablas</strong>Crear una CTE llamada <span class="inline-code">VentasClientes</span> que una las tablas <span class="inline-code">Ventas</span> y <span class="inline-code">Clientes</span> mediante <span class="inline-code">cliente_id</span>. En la consulta principal, mostrar los clientes que realizaron más de 3 compras durante los últimos 12 meses.</li>
+<li><strong>CTE con ORDER BY y LIMIT</strong>Crear una CTE llamada <span class="inline-code">EmpleadosMejorPagos</span> que seleccione los 10 empleados con los salarios más altos. Mostrar su nombre y salario en la consulta principal.</li>
+<li><strong>CTE con GROUP BY y HAVING</strong>Crear una CTE llamada <span class="inline-code">VentasPorMes</span> que agrupe las ventas por año y mes utilizando <span class="inline-code">YEAR()</span> y <span class="inline-code">MONTH()</span>. En la consulta principal, mostrar únicamente los meses cuyo total de ventas sea superior a 5000.</li>
+<li><strong>CTE para encontrar duplicados</strong>Crear una CTE llamada <span class="inline-code">ClientesDuplicados</span> que detecte nombres y apellidos repetidos en la tabla <span class="inline-code">Clientes</span>. Mostrar en la consulta principal el nombre, el apellido y la cantidad de repeticiones.</li>
+<li><strong>CTE anidada</strong>Crear una CTE llamada <span class="inline-code">TotalVentasPorCliente</span> que calcule el total vendido por cada cliente. Luego, definir una segunda CTE que seleccione únicamente los clientes cuyo total de ventas sea superior a 10000.</li>
+<li><strong>CTE con JOIN y funciones de fecha</strong>Crear una CTE llamada <span class="inline-code">VentasUltimoMes</span> que seleccione las ventas realizadas desde <span class="inline-code">DATE_SUB(CURDATE(), INTERVAL 1 MONTH)</span> hasta la fecha actual. Luego, unir el resultado con la tabla <span class="inline-code">Clientes</span> y mostrar el nombre del cliente, la fecha y el valor de cada venta.</li>
+</ol>
+
+<hr/>
+<h2>Script de tablas</h2>
+<p>Ejecutar este script antes de resolver los ejercicios.</p>
+<div class="code-block"><pre><code>CREATE TABLE Departamentos (
+    departamento_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_departamento VARCHAR(100) NOT NULL,
+    jefe_id INT DEFAULT NULL
+);
+
+CREATE TABLE Empleados (
+    empleado_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    departamento_id INT NOT NULL,
+    fecha_contratacion DATE NOT NULL,
+    salario DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (departamento_id)
+        REFERENCES Departamentos(departamento_id)
+);
+
+-- jefe_id apunta a un empleado existente
+ALTER TABLE Departamentos
+ADD CONSTRAINT fk_jefe_id
+FOREIGN KEY (jefe_id) REFERENCES Empleados(empleado_id);
+
+CREATE TABLE Clientes (
+    cliente_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Ventas (
+    venta_id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente_id INT NOT NULL,
+    empleado_id INT NOT NULL,
+    fecha_venta DATE NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES Clientes(cliente_id),
+    FOREIGN KEY (empleado_id) REFERENCES Empleados(empleado_id)
+);</code></pre></div>
+
+<h2>Datos de prueba sugeridos</h2>
+<div class="note"><strong>Objetivo:</strong> estos datos no forman parte de las consignas. Se incluyen para que todos los ejercicios puedan ejecutarse y arrojen resultados verificables.</div>
+<div class="code-block"><pre><code>INSERT INTO Departamentos (departamento_id, nombre_departamento, jefe_id) VALUES
+(1, 'Sistemas', NULL),
+(2, 'Ventas', NULL),
+(3, 'Administracion', NULL);
+
+INSERT INTO Empleados
+(empleado_id, nombre, departamento_id, fecha_contratacion, salario) VALUES
+(1, 'Ana Torres',     1, '2018-03-10', 6500.00),
+(2, 'Bruno Diaz',     1, DATE_SUB(CURDATE(), INTERVAL 2 YEAR), 3500.00),
+(3, 'Carla Gomez',    2, '2019-06-20', 7000.00),
+(4, 'Diego Perez',    2, DATE_SUB(CURDATE(), INTERVAL 1 YEAR), 5000.00),
+(5, 'Elena Ruiz',     3, '2017-01-15', 3000.00),
+(6, 'Fabio Lopez',    3, DATE_SUB(CURDATE(), INTERVAL 6 MONTH), 2800.00);
+
+UPDATE Departamentos SET jefe_id = 1 WHERE departamento_id = 1;
+UPDATE Departamentos SET jefe_id = 3 WHERE departamento_id = 2;
+UPDATE Departamentos SET jefe_id = 5 WHERE departamento_id = 3;
+
+INSERT INTO Clientes (cliente_id, nombre, apellido) VALUES
+(1, 'Laura',  'Perez'),
+(2, 'Martin', 'Gomez'),
+(3, 'Ana',    'Lopez'),
+(4, 'Ana',    'Lopez'),
+(5, 'Pedro',  'Diaz'),
+(6, 'Sofia',  'Ruiz');
+
+INSERT INTO Ventas
+(venta_id, cliente_id, empleado_id, fecha_venta, valor) VALUES
+(1,  1, 3, DATE_SUB(CURDATE(), INTERVAL 2 DAY),  3200.00),
+(2,  1, 3, DATE_SUB(CURDATE(), INTERVAL 7 DAY),  2800.00),
+(3,  1, 4, DATE_SUB(CURDATE(), INTERVAL 12 DAY), 4100.00),
+(4,  1, 4, DATE_SUB(CURDATE(), INTERVAL 20 DAY), 3500.00),
+(5,  2, 3, DATE_SUB(CURDATE(), INTERVAL 3 DAY),   900.00),
+(6,  2, 3, DATE_SUB(CURDATE(), INTERVAL 25 DAY), 1200.00),
+(7,  3, 4, '2025-06-05', 4000.00),
+(8,  4, 4, '2025-06-20', 2500.00),
+(9,  6, 3, '2025-07-10',  750.00),
+(10, 6, 3, '2025-07-18', 1600.00);</code></pre></div>
+
+<div class="success"><strong>Control del TP:</strong> el modelo de tablas permite resolver las 10 UDF y las 9 CTE propuestas. Los datos de prueba incluyen clientes sin ventas, clientes duplicados, jefes de departamento, empleados con distinta antigüedad, ventas recientes y montos suficientes para comprobar filtros, agregaciones y umbrales.</div>
+
+<footer>Instituto Argentino de la Empresa · Analista de Sistemas · 2do año · Bases de Datos | Trabajo Práctico: UDF y CTE en MySQL</footer>
+</div>
+</body>
+</html>
