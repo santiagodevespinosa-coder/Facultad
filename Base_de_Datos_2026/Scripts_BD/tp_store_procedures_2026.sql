@@ -290,8 +290,8 @@ BEGIN
 	INSERT INTO compras (id_compra, fecha, monto)
     VALUES(p_id_cliente, CURDATE(), p_monto);
     
-    -- Declaracion para el nuevo ID
-    SET v_nuevo_id = LAST_INSERT_ID();
+    -- Selecciono el ultimo ID de la ultima compra registrada
+    SELECT LAST_INSERT_ID() AS ultima_compra_registrada;
     
     -- Actualizacion de saldo del cliente
     
